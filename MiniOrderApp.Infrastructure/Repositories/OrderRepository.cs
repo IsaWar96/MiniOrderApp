@@ -88,4 +88,16 @@ public class OrderRepository : IOrderRepository
     public Order? GetById(int id) => throw new NotImplementedException();
     public void Update(Order order) => throw new NotImplementedException();
     public void Delete(int id) => throw new NotImplementedException();
+
+    public void MarkAsReturned(int orderId)
+    {
+        using IDbConnection db = _factory.Create();
+
+        const string sql = @"
+        UPDATE Orders
+        SET Status = 'Returned'
+        WHERE OrderId = @OrderId;";
+
+        db.Execute(sql, new { OrderId = orderId });
+    }
 }
