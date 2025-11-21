@@ -11,7 +11,7 @@ public class Order
     // Holds items in the order
     public List<OrderItem> Items { get; } = new();
 
-    public Order(int customerId, DateTime orderDate)
+    public Order(int customerId, DateTime orderDate, decimal totalAmount)
     {
         if (customerId <= 0)
             throw new ArgumentException("CustomerId must be positive", nameof(customerId));
@@ -19,7 +19,7 @@ public class Order
         CustomerId = customerId;
         OrderDate = orderDate;
         Status = OrderStatus.Created;
-        TotalAmount = 0m;
+        TotalAmount = totalAmount;
     }
 
     public Order()
