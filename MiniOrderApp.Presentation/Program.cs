@@ -14,22 +14,57 @@ internal class Program
 
         var factory = new SQLiteConnectionFactory(connectionString);
         ICustomerRepository customerRepo = new CustomerRepository(factory);
+        IOrderRepository orderRepo = new OrderRepository(factory);
 
-        var customers = customerRepo.GetCustomers().ToList();
-        foreach (var c in customers)
+        var orders = orderRepo.GetOrders().ToList();
+        foreach (var o in orders)
         {
-            Console.WriteLine($"{c.Id}. {c.Name} ({c.Email})");
+            Console.WriteLine($"{o.Id}. Customer {o.CustomerId}, Status: {o.Status}, Total: {o.TotalAmount}");
         }
 
-        Console.Write("Enter ID of customer you want to delete: ");
-        var idText = Console.ReadLine();
-        if (!int.TryParse(idText, out var customerId))
+        Console.Write("Enter ID on order you want to update: ");
+        var orderIdText = Console.ReadLine();
+        if (!int.TryParse(orderIdText, out var orderId))
         {
             Console.WriteLine("Invalid ID.");
             return;
         }
 
-        customerRepo.Delete(customerId);
-        Console.WriteLine("Customer deleted.");
+        var orderToUpdate = orderRepo.GetById(orderId);
+        if (orderToUpdate is null)
+        {
+            Console.WriteLine("Order not found.");
+            return;
+        }
+
+        Console.WriteLine("Choose new status:");
+        Console.WriteLine("1. Created");
+        Console.WriteLine("2. Paid");
+        Console.WriteLine("3. Returned");
+        var statusChoice = Console.ReadLine();
+
+        OrderStatus newStatus = orderToUpdate.Status;
+
+        switch (statusChoice)
+        {
+            case "1":
+                newStatus = OrderStatus.Created;
+                break;
+            case "2":
+                newStatus = OrderStatus.Paid;
+                break;
+            case "3":
+                newStatus = OrderStatus.Returned;
+                break;
+            default:
+                Console.WriteLine("Invalid choice.");
+                return;
+        }
+
+        orderToUpdate.SetStatus(newStatus);
+
+        orderRepo.Update(orderToUpdate);
+
+        Console.WriteLine("Order updated.");
     }
 }
