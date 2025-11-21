@@ -102,7 +102,28 @@ public class OrderRepository : IOrderRepository
 
         return db.QueryFirstOrDefault<Order>(sql, new { Id = id });
     }
-    public void Update(Order order) => throw new NotImplementedException();
+    public void Update(Order order)
+    {
+        using IDbConnection db = _factory.Create();
+
+        const string sql = @"
+        UPDATE Orders
+        SET CustomerId = @CustomerId,
+            OrderDate = @OrderDate,
+            Status = @Status,
+            TotalAmount = @TotalAmount
+        WHERE OrderId = @Id;
+        ";
+
+        db.Execute(sql, new
+        {
+            order.CustomerId,
+            OrderDate = order.OrderDate.ToString("yyyy-MM-dd"),
+            Status = order.Status.ToString(),
+            order.TotalAmount,
+            order.Id
+        });
+    }
     public void Delete(int id) => throw new NotImplementedException();
 
     public void MarkAsReturned(int orderId)
