@@ -1,7 +1,7 @@
-﻿using MiniOrderApp.Domain;
-using MiniOrderApp.Domain.Interfaces;
+﻿using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
 using MiniOrderApp.Infrastructure.Repositories;
+using MiniOrderApp.Infrastructure.Services;
 internal class Program
 {
     private static void Main(string[] args)
@@ -58,9 +58,18 @@ internal class Program
             Console.WriteLine($"Reason: {returnInfo.Reason}");
             Console.WriteLine($"Refunded: {returnInfo.RefundedAmount}");
         }
+        Console.Write("Do you want to save the receipt as a textfile? (y/n): ");
+        var answer = Console.ReadLine();
+
+        if (answer?.ToLower() == "y")
+        {
+            var receiptService = new TextReceiptService();
+            var path = receiptService.SaveReceipt(order, customer!, items, returnInfo);
+
+            Console.WriteLine($"Receipt saved to: {path}");
+        }
 
         Console.WriteLine("\nDone. Press any key...");
         Console.ReadKey();
-
     }
 }
