@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using MiniOrderApp.Domain;
 
 namespace MiniOrderApp.Infrastructure.Services;
