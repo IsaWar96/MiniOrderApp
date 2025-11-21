@@ -41,7 +41,7 @@ public class OrderRepository : IOrderRepository
 
         foreach (var item in order.Items)
         {
-            db.Execute(sql, new
+            db.Execute(sqlItems, new
             {
                 OrderId = orderId,
                 item.ProductName,

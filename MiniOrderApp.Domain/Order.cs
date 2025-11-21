@@ -19,7 +19,7 @@ public class Order
         CustomerId = customerId;
         OrderDate = orderDate;
         Status = OrderStatus.Created;
-        TotalAmount = totalAmount;
+        TotalAmount = 0m;
     }
 
     public Order()
@@ -41,7 +41,6 @@ public class Order
 
     public void RecalculateTotal()
     {
-        decimal TotalAmount = 0;
 
         foreach (var i in Items)
         {
