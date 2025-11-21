@@ -70,6 +70,22 @@ public class CustomerRepository : ICustomerRepository
 
     public void Update(Customer customer)
     {
-        throw new NotImplementedException();
+        using IDbConnection db = _factory.Create();
+
+        const string sql = @"
+        UPDATE Customers
+        SET Name = @Name,
+            Email = @Email,
+            Phone = @Phone
+        WHERE CustomerId = @Id;
+        ";
+
+        db.Execute(sql, new
+        {
+            customer.Name,
+            customer.Email,
+            customer.Phone,
+            customer.Id
+        });
     }
 }
