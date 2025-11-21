@@ -47,7 +47,11 @@ public class CustomerRepository : ICustomerRepository
 
     public void Delete(int id)
     {
-        throw new NotImplementedException();
+        using IDbConnection db = _factory.Create();
+
+        const string sql = @"DELETE FROM Customers WHERE CustomerId = @Id;";
+
+        db.Execute(sql, new { Id = id });
     }
 
     public Customer? GetById(int id)
