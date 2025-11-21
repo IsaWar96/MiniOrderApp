@@ -31,6 +31,24 @@ public class OrderRepository : IOrderRepository
             Status = order.Status.ToString(),
             order.TotalAmount
         });
+
+        // Get OrderId
+        int orderId = db.ExecuteScalar<int>("SELECT last_insert_rowid();");
+
+        const string sqlItems = @"
+        INSERT INTO OrderItems (OrderId, ProductName, Quantity, UnitPrice)
+        VALUES (@OrderId, @ProductName, @Quantity, @UnitPrice);";
+
+        foreach (var item in order.Items)
+        {
+            db.Execute(sql, new
+            {
+                OrderId = orderId,
+                item.ProductName,
+                item.Quantity,
+                item.UnitPrice
+            });
+        }
     }
 
     public IEnumerable<Order> GetOrders()
