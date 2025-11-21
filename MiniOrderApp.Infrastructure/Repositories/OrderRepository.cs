@@ -31,7 +31,20 @@ public class OrderRepository : IOrderRepository
     }
     public void Add(Order order)
     {
-        throw new NotImplementedException();
+        using IDbConnection db = _factory.Create();
+
+        const string sql = @"
+        INSERT INTO Orders (CustomerId, OrderDate, Status, TotalAmount)
+        VALUES (@CustomerId, @OrderDate, @Status, @TotalAmount);
+        ";
+
+        db.Execute(sql, new
+        {
+            order.CustomerId,
+            order.OrderDate,
+            order.Status,
+            order.TotalAmount
+        });
     }
 
     public void Delete(int id)
