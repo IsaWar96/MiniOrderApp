@@ -1,3 +1,5 @@
+using System.Data;
+using Dapper;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
@@ -11,9 +13,36 @@ public class CustomerRepository : ICustomerRepository
     {
         _factory = factory;
     }
+    public IEnumerable<Customer> GetCustomers()
+    {
+        using IDbConnection db = _factory.Create();
+
+        const string sql = @"
+        SELECT
+            CustomerId AS Id,
+            Name,
+            Email,
+            Phone
+        FROM Customers;
+        ";
+
+        return db.Query<Customer>(sql);
+    }
     public void Add(Customer customer)
     {
-        throw new NotImplementedException();
+        using var db = _factory.Create();
+
+        const string sql = @"
+        INSERT INTO Customers (Name, Email, Phone)
+        VALUES (@Name, @Email, @Phone);
+        ";
+
+        db.Execute(sql, new
+        {
+            customer.Name,
+            customer.Email,
+            customer.Phone
+        });
     }
 
     public void Delete(int id)
@@ -26,10 +55,6 @@ public class CustomerRepository : ICustomerRepository
         throw new NotImplementedException();
     }
 
-    public IEnumerable<Customer> GetCustomers()
-    {
-        throw new NotImplementedException();
-    }
 
     public void Update(Customer customer)
     {
