@@ -18,79 +18,49 @@ internal class Program
 
         var customers = customerRepo.GetCustomers().ToList();
 
-        // Get all orders
-        var orders = orderRepo.GetOrders().ToList();
+        Console.Write("Enter Order ID to view details: ");
+        var idText = Console.ReadLine();
 
-        if (orders.Count == 0)
+        if (!int.TryParse(idText, out var orderId))
         {
-            Console.WriteLine("There are no orders to return.");
+            Console.WriteLine("Invalid ID.");
             return;
         }
 
-        Console.WriteLine("Orders:");
-        foreach (var o in orders)
-        {
-            Console.WriteLine($"Order {o.Id} - Customer {o.CustomerId} - Status {o.Status} - Total {o.TotalAmount}");
-        }
-
-        Console.Write("\nEnter the Order ID you want to return: ");
-        var orderIdStr = Console.ReadLine();
-        if (!int.TryParse(orderIdStr, out var orderId))
-        {
-            Console.WriteLine("Invalid order ID.");
-            return;
-        }
-
-        Order? orderToReturn = null;
-
-        foreach (var o in orders)
-        {
-            if (o.Id == orderId)
-            {
-                orderToReturn = o;
-                break;
-            }
-        }
-
-        if (orderToReturn == null)
+        var order = orderRepo.GetById(orderId);
+        if (order == null)
         {
             Console.WriteLine("Order not found.");
             return;
         }
 
-        // 3. Reason + refund
-        Console.Write("Return reason: ");
-        var reason = Console.ReadLine() ?? "";
+        var customer = customerRepo.GetById(order.CustomerId);
+        var items = orderRepo.GetItemsForOrder(orderId);
+        var returnInfo = returnRepo.GetByOrderId(orderId);
 
-        Console.Write("Refunded amount: ");
-        var refundStr = Console.ReadLine();
-        if (!decimal.TryParse(refundStr, out var refundedAmount))
+        Console.WriteLine($"\nOrder {order.Id}");
+        Console.WriteLine($"Date: {order.OrderDate:yyyy-MM-dd}");
+        Console.WriteLine($"Status: {order.Status}");
+        Console.WriteLine($"Total: {order.TotalAmount}");
+
+        Console.WriteLine("\nCustomer:");
+        Console.WriteLine($"{customer!.Name} ({customer.Email})");
+
+        Console.WriteLine("\nItems:");
+        foreach (var item in items)
         {
-            Console.WriteLine("Invalid amount.");
-            return;
+            Console.WriteLine($" - {item.ProductName} ({item.Quantity} x {item.UnitPrice}) = {item.LineTotal}");
         }
 
-        var returnInfo = new Return(
-            orderId: orderId,
-            returnDate: DateTime.Today,
-            reason: reason,
-            refundedAmount: refundedAmount
-        );
-
-        returnRepo.AddReturn(returnInfo);
-        orderRepo.MarkAsReturned(orderId);
-
-        Console.WriteLine("\nOrder returned successfully!");
-
-        // 5. Visa uppdaterade orders
-        var updatedOrders = orderRepo.GetOrders();
-        Console.WriteLine("\nUpdated orders:");
-        foreach (var o in updatedOrders)
+        if (returnInfo != null)
         {
-            Console.WriteLine($"Order {o.Id} - Customer {o.CustomerId} - Status {o.Status} - Total {o.TotalAmount}");
+            Console.WriteLine("\nReturn info:");
+            Console.WriteLine($"Reason: {returnInfo.Reason}");
+            Console.WriteLine($"Refunded: {returnInfo.RefundedAmount}");
         }
 
-        Console.WriteLine("\nDone. Press any key to exit.");
+        Console.WriteLine("\nDone. Press any key...");
         Console.ReadKey();
+
     }
 }
