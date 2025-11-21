@@ -1,7 +1,6 @@
 ﻿using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
-using Microsoft.Data.Sqlite;
 using MiniOrderApp.Infrastructure.Repositories;
 internal class Program
 {
@@ -16,36 +15,51 @@ internal class Program
         var factory = new SQLiteConnectionFactory(connectionString);
         IOrderRepository orderRepo = new OrderRepository(factory);
 
-        // 1. Fråga användaren om totalbelopp
-        Console.WriteLine("Create new order for CustomerId = 1");
-        Console.Write("Input total amount: ");
+        Console.WriteLine("Creating new order for customer 1...");
 
-        var totalText = Console.ReadLine();
-
-        if (!decimal.TryParse(totalText, out var totalAmount))
+        Console.Write("How many products does the order have? ");
+        var countText = Console.ReadLine();
+        if (!int.TryParse(countText, out int count) || count < 1)
         {
-            Console.WriteLine("Ogiltigt belopp. Avslutar.");
+            Console.WriteLine("Error: Invalid amount.");
             return;
         }
 
-        // 2. Skapa Order via konstruktorn (sätter OrderDate och Status internt)
-        var newOrder = new Order(
+        var order = new Order(
             customerId: 1,
             orderDate: DateTime.Today,
-            totalAmount: totalAmount
+            totalAmount: 0
         );
 
-        // 3. Spara ordern
-        orderRepo.Add(newOrder);
-        Console.WriteLine("Order sparad!\n");
+        for (int i = 0; i < count; i++)
+        {
+            Console.WriteLine($"\nProdukt {i + 1}:");
 
-        // 4. Hämta och skriv ut alla orders
+            Console.Write("Name: ");
+            var name = Console.ReadLine() ?? "";
+
+            Console.Write("Amount: ");
+            var qtyText = Console.ReadLine() ?? "";
+            int qty = int.Parse(qtyText);
+
+            Console.Write("Price per unit: ");
+            var priceText = Console.ReadLine() ?? "";
+            decimal price = decimal.Parse(priceText);
+
+            var item = new OrderItem(name, qty, price);
+            order.AddItem(item);  // totalen uppdateras
+        }
+
+        // 3. Spara order + items
+        orderRepo.Add(order);
+
+        Console.WriteLine("\nOrder saved!");
+
+        // 4. Skriv ut alla orders
         var orders = orderRepo.GetOrders();
-
-        Console.WriteLine("All orders in the database");
         foreach (var o in orders)
         {
-            Console.WriteLine($"Order {o.Id} - Customer: {o.CustomerId} - Date: {o.OrderDate:yyyy-MM-dd} - Total: {o.TotalAmount}");
+            Console.WriteLine($"Order {o.Id} - Customer {o.CustomerId} - Total {o.TotalAmount}");
         }
 
         Console.WriteLine("Done. Press Any key to continue...");
