@@ -124,7 +124,17 @@ public class OrderRepository : IOrderRepository
             order.Id
         });
     }
-    public void Delete(int id) => throw new NotImplementedException();
+    public void Delete(int id)
+    {
+        using IDbConnection db = _factory.Create();
+
+        //Deletes from orderitems if there is no ON CASCADE DELETE
+        const string deleteItemsSql = @"DELETE FROM OrderItems WHERE OrderId = @Id;";
+        db.Execute(deleteItemsSql, new { Id = id });
+
+        const string deleteOrderSql = @"DELETE FROM Orders WHERE OrderId = @Id;";
+        db.Execute(deleteOrderSql, new { Id = id });
+    }
 
     public void MarkAsReturned(int orderId)
     {
