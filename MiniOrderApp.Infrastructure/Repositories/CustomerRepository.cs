@@ -52,7 +52,19 @@ public class CustomerRepository : ICustomerRepository
 
     public Customer? GetById(int id)
     {
-        throw new NotImplementedException();
+        using var db = _factory.Create();
+
+        const string sql = @"
+        SELECT
+            CustomerId AS Id,
+            Name,
+            Email,
+            Phone
+        FROM Customers
+        WHERE CustomerId = @Id;
+        ";
+
+        return db.QueryFirstOrDefault<Customer>(sql, new { Id = id });
     }
 
 
