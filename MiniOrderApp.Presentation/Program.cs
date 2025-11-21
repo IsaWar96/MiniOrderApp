@@ -1,27 +1,54 @@
-﻿using MiniOrderApp.Infrastructure.Database;
-using MiniOrderApp.Infrastructure.Repositories;
+﻿using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
-using MiniOrderApp.Domain;
+using MiniOrderApp.Infrastructure.Database;
+using Microsoft.Data.Sqlite;
+using MiniOrderApp.Infrastructure.Repositories;
 internal class Program
 {
     private static void Main(string[] args)
     {
-        var connectionstring = "Data Source=miniorder.db";
 
-        DbInitializer.Initialize(connectionstring);
+        var connectionString = "Data Source=miniorder.db";
 
+        // Initiera databasen
+        DbInitializer.Initialize(connectionString);
 
-        var factory = new SQLiteConnectionFactory(connectionstring);
+        var factory = new SQLiteConnectionFactory(connectionString);
         IOrderRepository orderRepo = new OrderRepository(factory);
 
-        var orders = orderRepo.GetOrders();
+        // 1. Fråga användaren om totalbelopp
+        Console.WriteLine("Create new order for CustomerId = 1");
+        Console.Write("Input total amount: ");
 
-        foreach (var o in orders)
+        var totalText = Console.ReadLine();
+
+        if (!decimal.TryParse(totalText, out var totalAmount))
         {
-            Console.WriteLine($"Order {o.Id} - Customer: {o.CustomerId} - Total: {o.TotalAmount}");
+            Console.WriteLine("Ogiltigt belopp. Avslutar.");
+            return;
         }
 
-        Console.WriteLine("Press any key to exit...");
+        // 2. Skapa Order via konstruktorn (sätter OrderDate och Status internt)
+        var newOrder = new Order(
+            customerId: 1,
+            orderDate: DateTime.Today,
+            totalAmount: totalAmount
+        );
+
+        // 3. Spara ordern
+        orderRepo.Add(newOrder);
+        Console.WriteLine("Order sparad!\n");
+
+        // 4. Hämta och skriv ut alla orders
+        var orders = orderRepo.GetOrders();
+
+        Console.WriteLine("All orders in the database");
+        foreach (var o in orders)
+        {
+            Console.WriteLine($"Order {o.Id} - Customer: {o.CustomerId} - Date: {o.OrderDate:yyyy-MM-dd} - Total: {o.TotalAmount}");
+        }
+
+        Console.WriteLine("Done. Press Any key to continue...");
         Console.ReadKey();
     }
 }
