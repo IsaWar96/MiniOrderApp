@@ -1,4 +1,5 @@
-﻿using MiniOrderApp.Domain.Interfaces;
+﻿using MiniOrderApp.Domain;
+using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
 using MiniOrderApp.Infrastructure.Repositories;
 using MiniOrderApp.Infrastructure.Services;
@@ -13,63 +14,42 @@ internal class Program
 
         var factory = new SQLiteConnectionFactory(connectionString);
         ICustomerRepository customerRepo = new CustomerRepository(factory);
-        IReturnRepository returnRepo = new ReturnRepository(factory);
-        IOrderRepository orderRepo = new OrderRepository(factory);
 
         var customers = customerRepo.GetCustomers().ToList();
+        foreach (var c in customers)
+        {
+            Console.WriteLine($"{c.Id}. {c.Name} ({c.Email})");
+        }
 
-        Console.Write("Enter Order ID to view details: ");
+        Console.Write("Enter the ID of the customer you want to update: ");
         var idText = Console.ReadLine();
-
-        if (!int.TryParse(idText, out var orderId))
+        if (!int.TryParse(idText, out var customerId))
         {
             Console.WriteLine("Invalid ID.");
             return;
         }
 
-        var order = orderRepo.GetById(orderId);
-        if (order == null)
+        var customerToUpdate = customerRepo.GetById(customerId);
+        if (customerToUpdate is null)
         {
-            Console.WriteLine("Order not found.");
+            Console.WriteLine("Customer not found.");
             return;
         }
 
-        var customer = customerRepo.GetById(order.CustomerId);
-        var items = orderRepo.GetItemsForOrder(orderId);
-        var returnInfo = returnRepo.GetByOrderId(orderId);
+        Console.Write("New name: ");
+        var newName = Console.ReadLine() ?? "";
 
-        Console.WriteLine($"\nOrder {order.Id}");
-        Console.WriteLine($"Date: {order.OrderDate:yyyy-MM-dd}");
-        Console.WriteLine($"Status: {order.Status}");
-        Console.WriteLine($"Total: {order.TotalAmount}");
+        Console.Write("New email: ");
+        var newEmail = Console.ReadLine() ?? "";
 
-        Console.WriteLine("\nCustomer:");
-        Console.WriteLine($"{customer!.Name} ({customer.Email})");
+        Console.Write("New phonenumber: ");
+        var newPhone = Console.ReadLine() ?? "";
 
-        Console.WriteLine("\nItems:");
-        foreach (var item in items)
-        {
-            Console.WriteLine($" - {item.ProductName} ({item.Quantity} x {item.UnitPrice}) = {item.LineTotal}");
-        }
+        var updatedCustomer = new Customer(newName, newEmail, newPhone);
+        updatedCustomer.Id = customerToUpdate.Id;
 
-        if (returnInfo != null)
-        {
-            Console.WriteLine("\nReturn info:");
-            Console.WriteLine($"Reason: {returnInfo.Reason}");
-            Console.WriteLine($"Refunded: {returnInfo.RefundedAmount}");
-        }
-        Console.Write("Do you want to save the receipt as a textfile? (y/n): ");
-        var answer = Console.ReadLine();
+        customerRepo.Update(updatedCustomer);
 
-        if (answer?.ToLower() == "y")
-        {
-            var receiptService = new TextReceiptService();
-            var path = receiptService.SaveReceipt(order, customer!, items, returnInfo);
-
-            Console.WriteLine($"Receipt saved to: {path}");
-        }
-
-        Console.WriteLine("\nDone. Press any key...");
-        Console.ReadKey();
+        Console.WriteLine("Customer updated.");
     }
 }
