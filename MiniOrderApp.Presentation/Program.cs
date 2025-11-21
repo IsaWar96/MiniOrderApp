@@ -21,7 +21,7 @@ internal class Program
             Console.WriteLine($"{c.Id}. {c.Name} ({c.Email})");
         }
 
-        Console.Write("Enter the ID of the customer you want to update: ");
+        Console.Write("Enter ID of customer you want to delete: ");
         var idText = Console.ReadLine();
         if (!int.TryParse(idText, out var customerId))
         {
@@ -29,27 +29,7 @@ internal class Program
             return;
         }
 
-        var customerToUpdate = customerRepo.GetById(customerId);
-        if (customerToUpdate is null)
-        {
-            Console.WriteLine("Customer not found.");
-            return;
-        }
-
-        Console.Write("New name: ");
-        var newName = Console.ReadLine() ?? "";
-
-        Console.Write("New email: ");
-        var newEmail = Console.ReadLine() ?? "";
-
-        Console.Write("New phonenumber: ");
-        var newPhone = Console.ReadLine() ?? "";
-
-        var updatedCustomer = new Customer(newName, newEmail, newPhone);
-        updatedCustomer.Id = customerToUpdate.Id;
-
-        customerRepo.Update(updatedCustomer);
-
-        Console.WriteLine("Customer updated.");
+        customerRepo.Delete(customerId);
+        Console.WriteLine("Customer deleted.");
     }
 }
