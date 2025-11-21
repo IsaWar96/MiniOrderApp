@@ -9,5 +9,7 @@ public interface IOrderRepository
     void Delete(int id);
 
     IEnumerable<OrderItem> GetItemsForOrder(int orderId);
+
+    void MarkAsReturned(int orderId);
 }
 
