@@ -85,7 +85,23 @@ public class OrderRepository : IOrderRepository
         return db.Query<OrderItem>(sql, new { OrderId = orderId });
     }
 
-    public Order? GetById(int id) => throw new NotImplementedException();
+    public Order? GetById(int id)
+    {
+        using var db = _factory.Create();
+
+        const string sql = @"
+        SELECT
+            OrderId AS Id,
+            CustomerId,
+            OrderDate,
+            Status,
+            TotalAmount
+        FROM Orders
+        WHERE OrderId = @Id;
+        ";
+
+        return db.QueryFirstOrDefault<Order>(sql, new { Id = id });
+    }
     public void Update(Order order) => throw new NotImplementedException();
     public void Delete(int id) => throw new NotImplementedException();
 
