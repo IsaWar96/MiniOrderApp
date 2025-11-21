@@ -13,70 +13,84 @@ internal class Program
 
         var factory = new SQLiteConnectionFactory(connectionString);
         ICustomerRepository customerRepo = new CustomerRepository(factory);
+        IReturnRepository returnRepo = new ReturnRepository(factory);
         IOrderRepository orderRepo = new OrderRepository(factory);
 
         var customers = customerRepo.GetCustomers().ToList();
 
-        if (customers.Count == 0)
-        {
-            Console.WriteLine("There is no customers yet. Create a customer first");
-        }
+        // Get all orders
+        var orders = orderRepo.GetOrders().ToList();
 
-        Console.WriteLine("Choose customer for the order: ");
-        foreach (var c in customers)
+        if (orders.Count == 0)
         {
-            Console.WriteLine($"{c.Id}. {c.Name}, {c.Email}");
-        }
-
-        Console.Write("Customer-ID: ");
-        var custIdStr = Console.ReadLine();
-        if (!int.TryParse(custIdStr, out var custId))
-        {
-            Console.WriteLine("Invalid customer-ID");
+            Console.WriteLine("There are no orders to return.");
             return;
         }
 
-        Console.Write("How many products does the order have?: ");
-        var countText = Console.ReadLine();
-        if (!int.TryParse(countText, out var count) || count < 1)
+        Console.WriteLine("Orders:");
+        foreach (var o in orders)
         {
-            Console.WriteLine("Invalid Amount");
+            Console.WriteLine($"Order {o.Id} - Customer {o.CustomerId} - Status {o.Status} - Total {o.TotalAmount}");
+        }
+
+        Console.Write("\nEnter the Order ID you want to return: ");
+        var orderIdStr = Console.ReadLine();
+        if (!int.TryParse(orderIdStr, out var orderId))
+        {
+            Console.WriteLine("Invalid order ID.");
             return;
         }
-        var cOrder = new Order(
-            customerId: custId,
-            orderDate: DateTime.Today,
-            totalAmount: 0
+
+        Order? orderToReturn = null;
+
+        foreach (var o in orders)
+        {
+            if (o.Id == orderId)
+            {
+                orderToReturn = o;
+                break;
+            }
+        }
+
+        if (orderToReturn == null)
+        {
+            Console.WriteLine("Order not found.");
+            return;
+        }
+
+        // 3. Reason + refund
+        Console.Write("Return reason: ");
+        var reason = Console.ReadLine() ?? "";
+
+        Console.Write("Refunded amount: ");
+        var refundStr = Console.ReadLine();
+        if (!decimal.TryParse(refundStr, out var refundedAmount))
+        {
+            Console.WriteLine("Invalid amount.");
+            return;
+        }
+
+        var returnInfo = new Return(
+            orderId: orderId,
+            returnDate: DateTime.Today,
+            reason: reason,
+            refundedAmount: refundedAmount
         );
 
-        for (int i = 0; i < count; i++)
+        returnRepo.AddReturn(returnInfo);
+        orderRepo.MarkAsReturned(orderId);
+
+        Console.WriteLine("\nOrder returned successfully!");
+
+        // 5. Visa uppdaterade orders
+        var updatedOrders = orderRepo.GetOrders();
+        Console.WriteLine("\nUpdated orders:");
+        foreach (var o in updatedOrders)
         {
-            Console.WriteLine($"\nProdukt {i + 1}:");
-            Console.Write("Name: ");
-            var name = Console.ReadLine() ?? "";
-
-            Console.Write("Quantity: ");
-            var qnty = Console.ReadLine() ?? "";
-            int quantity = int.Parse(qnty);
-
-            Console.Write("Price per unit: ");
-            var prperU = Console.ReadLine() ?? "";
-            decimal price = decimal.Parse(prperU);
-
-            var item = new OrderItem(name, quantity, price);
-            cOrder.AddItem(item);
-        }
-        orderRepo.Add(cOrder);
-
-        // Get all orders
-        var orders = orderRepo.GetOrders();
-
-        foreach (var order in orders)
-        {
-            Console.WriteLine($"Order {order.Id} - Customer {order.CustomerId} - Total {order.TotalAmount}");
+            Console.WriteLine($"Order {o.Id} - Customer {o.CustomerId} - Status {o.Status} - Total {o.TotalAmount}");
         }
 
-        Console.WriteLine("Done. Press Any key to continue.");
+        Console.WriteLine("\nDone. Press any key to exit.");
         Console.ReadKey();
     }
 }
