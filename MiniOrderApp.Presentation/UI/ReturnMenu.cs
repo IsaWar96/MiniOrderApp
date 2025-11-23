@@ -17,16 +17,16 @@ public class ReturnMenu
     public void Show()
     {
         Console.Clear();
-        Console.WriteLine("=== Return Order ===");
+        Console.WriteLine("Return Orders \n -------");
 
         var orders = _orders.GetOrders();
         foreach (var o in orders)
-            Console.WriteLine($"{o.Id}. {o.Status} - Total {o.TotalAmount}");
+            Console.WriteLine($"Order-ID: {o.Id} - Status: {o.Status} - Total: {o.TotalAmount}");
 
         Console.Write("Order ID to return: ");
         var id = int.Parse(Console.ReadLine()!);
 
-        Console.Write("Reason: ");
+        Console.Write("Reason for return: ");
         var reason = Console.ReadLine() ?? "";
         Console.Write("Refunded amount: ");
         var refund = decimal.Parse(Console.ReadLine()!);
@@ -36,7 +36,7 @@ public class ReturnMenu
         _returns.AddReturn(ret);
         _orders.MarkAsReturned(id);
 
-        Console.WriteLine("Returned.");
+        Console.WriteLine($"Returned order with ID: ({id}).");
         Console.ReadKey();
     }
 }
