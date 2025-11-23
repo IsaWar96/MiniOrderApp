@@ -130,6 +130,47 @@ public class CustomerRepositoryTests
         Assert.Equal("new@test.com", saved.Email);
         Assert.Equal("123456789", saved.Phone);
     }
+    [Fact]
+    public void Delete_Should_Remove_Customer_From_Database()
+    {
+        // Arrange
+        var (repo, conn) = CreateRepository();
+
+        const string insertSql = @"
+            INSERT INTO Customers (Name, Email, Phone)
+            VALUES (@Name, @Email, @Phone);
+            SELECT last_insert_rowid();
+        ";
+
+        long id = conn.ExecuteScalar<long>(insertSql, new
+        {
+            Name = "Customer To Delete",
+            Email = "delete@test.com",
+            Phone = "123456789"
+        });
+
+        // Act
+        repo.Delete((int)id);
+
+        // Assert
+        var customers = repo.GetCustomers().ToList();
+        bool customerExists = false;
+
+        foreach (var c in customers)
+        {
+            if (c.Id == id)
+            {
+                customerExists = true;
+            }
+        }
+
+        if (customerExists)
+        {
+            Assert.Fail("Customer should have been deleted but still exists.");
+        }
+
+    }
+
 }
 
 
