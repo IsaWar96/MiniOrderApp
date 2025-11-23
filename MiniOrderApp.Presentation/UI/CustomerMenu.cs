@@ -17,7 +17,7 @@ public class CustomerMenu
         while (true)
         {
             Console.Clear();
-            Console.WriteLine("=== Customers ===");
+            Console.WriteLine("Customers \n ------");
             Console.WriteLine("1. Add");
             Console.WriteLine("2. Update");
             Console.WriteLine("3. Delete");
@@ -71,14 +71,14 @@ public class CustomerMenu
         foreach (var c in list)
             Console.WriteLine($"{c.Id}. {c.Name}");
 
-        Console.Write("ID: ");
+        Console.Write("Customer-ID: ");
         if (!int.TryParse(Console.ReadLine(), out var id))
             return;
 
         var customer = _customers.GetById(id);
         if (customer == null)
         {
-            Console.WriteLine("Not found.");
+            Console.WriteLine("Customer was not found.");
             Console.ReadKey();
             return;
         }
@@ -93,7 +93,7 @@ public class CustomerMenu
         var updated = new Customer(name, email, phone) { Id = id };
         _customers.Update(updated);
 
-        Console.WriteLine("Updated.");
+        Console.WriteLine("Updated Customer.");
         Console.ReadKey();
     }
 
@@ -103,7 +103,7 @@ public class CustomerMenu
         foreach (var c in list)
             Console.WriteLine($"{c.Id}. {c.Name}");
 
-        Console.Write("ID to delete: ");
+        Console.Write("Customer-ID you want to delete: ");
         if (int.TryParse(Console.ReadLine(), out var id))
         {
             _customers.Delete(id);
@@ -117,9 +117,9 @@ public class CustomerMenu
     {
         var list = _customers.GetCustomers();
 
-        Console.WriteLine("Customer List \n =====");
+        Console.WriteLine("Customer List \n--------");
         foreach (var c in list)
-            Console.WriteLine($"{c.Id}: {c.Name}, {c.Email}, {c.Phone}");
+            Console.WriteLine($"{c.Id}. {c.Name} - {c.Email} - ({c.Phone})");
 
         Console.ReadKey();
     }
