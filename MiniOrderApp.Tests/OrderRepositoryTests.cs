@@ -121,5 +121,33 @@ public class OrderRepositoryTests
         var orders = repo.GetOrders().ToList();
         Assert.Empty(orders);
     }
+    [Fact]
+    public void MarkAsReturned_Should_Update_Status_To_Returned()
+    {
+        // Arrange
+        var (repo, conn) = CreateRepository();
+
+        const string insertSql = @"
+            INSERT INTO Orders (CustomerId, OrderDate, Status, TotalAmount)
+            VALUES (@CustomerId, @OrderDate, @Status, @TotalAmount);
+            SELECT last_insert_rowid();";
+
+        long orderId = conn.ExecuteScalar<long>(insertSql, new
+        {
+            CustomerId = 1,
+            OrderDate = DateTime.Today.ToString("yyyy-MM-dd"),
+            Status = OrderStatus.Created,
+            TotalAmount = 200m
+        });
+
+        // Act
+        repo.MarkAsReturned((int)orderId);
+
+        // Assert
+        var updated = repo.GetById((int)orderId);
+
+        Assert.NotNull(updated);
+        Assert.Equal(OrderStatus.Returned, updated!.Status);
+    }
 }
 
