@@ -19,7 +19,7 @@ public class OrderMenu
         while (true)
         {
             Console.Clear();
-            Console.WriteLine("=== Orders ===");
+            Console.WriteLine("Orders \n -------");
             Console.WriteLine("1. Create");
             Console.WriteLine("2. Update Status");
             Console.WriteLine("3. Delete");
@@ -51,7 +51,7 @@ public class OrderMenu
 
     private void Create()
     {
-        // kund
+
         var customers = _customers.GetCustomers().ToList();
         foreach (var c in customers)
             Console.WriteLine($"{c.Id}. {c.Name}");
@@ -86,9 +86,9 @@ public class OrderMenu
     {
         var list = _orders.GetOrders().ToList();
         foreach (var o in list)
-            Console.WriteLine($"{o.Id}. Status: {o.Status}");
+            Console.WriteLine($"Order-ID: {o.Id}. Status: {o.Status}");
 
-        Console.Write("Order ID: ");
+        Console.Write("Choose Order ID: ");
         var id = int.Parse(Console.ReadLine()!);
 
         Console.WriteLine("1. Created");
@@ -123,7 +123,7 @@ public class OrderMenu
 
         _orders.Update(order);
 
-        Console.WriteLine("Updated.");
+        Console.WriteLine($"Updated Status to {status}.");
         Console.ReadKey();
     }
 
@@ -131,14 +131,14 @@ public class OrderMenu
     {
         var list = _orders.GetOrders();
         foreach (var o in list)
-            Console.WriteLine($"{o.Id}. Total: {o.TotalAmount}");
+            Console.WriteLine($"Order-ID: {o.Id}. Total: {o.TotalAmount}");
 
-        Console.Write("ID to delete: ");
+        Console.Write("Choose ID to delete: ");
         var id = int.Parse(Console.ReadLine()!);
 
         _orders.Delete(id);
 
-        Console.WriteLine("Deleted.");
+        Console.WriteLine($"Deleted: ({id}).");
         Console.ReadKey();
     }
 
