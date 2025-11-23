@@ -5,7 +5,6 @@ using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
 using MiniOrderApp.Infrastructure.Repositories;
 using MiniOrderApp.Tests.Database;
-using Xunit;
 
 namespace MiniOrderApp.Tests;
 

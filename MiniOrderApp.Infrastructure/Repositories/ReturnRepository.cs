@@ -1,6 +1,5 @@
 using System.Data;
 using Dapper;
-using Microsoft.Data.Sqlite;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
