@@ -56,5 +56,45 @@ namespace MiniOrderApp.Tests
             Assert.Equal(1, order.CustomerId);
             Assert.Equal(OrderStatus.Created, order.Status);
         }
+        [Fact]
+        public void Add_Should_Insert_Order_In_Database()
+        {
+            // Arrange
+            var (repo, conn) = CreateRepository();
+
+            // create a test customer
+            const string insertCustomerSql = @"
+                INSERT INTO Customers (Name, Email, Phone)
+                VALUES (@Name, @Email, @Phone);
+                SELECT last_insert_rowid();";
+
+            long customerId = conn.ExecuteScalar<long>(insertCustomerSql, new
+            {
+                Name = "Test Customer",
+                Email = "test@example.com",
+                Phone = "123456789"
+            });
+
+            // Create a order in the domain layer
+            var order = new Order(
+                (int)customerId,
+                DateTime.Today,
+                200m
+            );
+
+            // Act
+            repo.Add(order);
+
+            // Assert
+            var orders = repo.GetOrders().ToList();
+
+            Assert.Single(orders);
+            var saved = orders.Single();
+
+            Assert.Equal((int)customerId, saved.CustomerId);
+            Assert.Equal(OrderStatus.Created, saved.Status);
+            Assert.Equal(200m, saved.TotalAmount);
+        }
+
     }
 }

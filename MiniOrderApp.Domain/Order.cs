@@ -19,7 +19,7 @@ public class Order
         CustomerId = customerId;
         OrderDate = orderDate;
         Status = OrderStatus.Created;
-        TotalAmount = 0m;
+        TotalAmount = totalAmount;
     }
 
     public Order()
