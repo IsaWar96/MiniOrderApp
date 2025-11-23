@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
+using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
 using MiniOrderApp.Infrastructure.Repositories;
@@ -105,7 +106,30 @@ public class CustomerRepositoryTests
         Assert.Equal((int)id, customer!.Id);
         Assert.Equal("Single Customer", customer.Name);
     }
+    [Fact]
+    public void Add_Should_Insert_Customer_In_Database()
+    {
+        // Arrange
+        var (repo, conn) = CreateRepository();
 
+        var customer = new Customer(
+            "New Customer",
+            "new@test.com",
+            "123456789"
+        );
+
+        // Act
+        repo.Add(customer);
+
+        // Assert
+        var customers = repo.GetCustomers().ToList();
+        Assert.Single(customers);
+
+        var saved = customers.Single();
+        Assert.Equal("New Customer", saved.Name);
+        Assert.Equal("new@test.com", saved.Email);
+        Assert.Equal("123456789", saved.Phone);
+    }
 }
 
 
