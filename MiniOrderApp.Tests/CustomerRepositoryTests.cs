@@ -78,6 +78,34 @@ public class CustomerRepositoryTests
         Assert.True(foundCustomer1);
         Assert.True(foundCustomer2);
     }
+    [Fact]
+    public void GetById_Should_Return_Single_Customer()
+    {
+        // Arrange
+        var (repo, conn) = CreateRepository();
+
+        const string insertSql = @"
+            INSERT INTO Customers (Name, Email, Phone)
+            VALUES (@Name, @Email, @Phone);
+            SELECT last_insert_rowid();
+        ";
+
+        long id = conn.ExecuteScalar<long>(insertSql, new
+        {
+            Name = "Single Customer",
+            Email = "single@test.com",
+            Phone = "123456789"
+        });
+
+        // Act
+        var customer = repo.GetById((int)id);
+
+        // Assert
+        Assert.NotNull(customer);
+        Assert.Equal((int)id, customer!.Id);
+        Assert.Equal("Single Customer", customer.Name);
+    }
+
 }
 
 
