@@ -23,10 +23,6 @@
     <ProjectReference Include="..\MiniOrderApp.Infrastructure\MiniOrderApp.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Database\" />
-  </ItemGroup>
-
 <ItemGroup>
   <Content Include="Database\schema.sql">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
