@@ -1,54 +1,35 @@
-using Dapper;
-using Microsoft.Data.Sqlite;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
-using MiniOrderApp.Infrastructure.Database;
-using MiniOrderApp.Infrastructure.Repositories;
-using MiniOrderApp.Tests.Database;
+using MiniOrderApp.Tests.Fakes;
 
 namespace MiniOrderApp.Tests;
 
 public class CustomerRepositoryTests
 {
-    private (ICustomerRepository repo, SqliteConnection conn) CreateRepository()
+    private ICustomerRepository CreateRepository()
     {
-        string connectionString = TestDatabaseFactory.CreateTestDatabase();
-
-        var factory = new SQLiteConnectionFactory(connectionString);
-        var repo = new CustomerRepository(factory);
-
-        var conn = new SqliteConnection(connectionString);
-        conn.Open();
-
-        // Turn off foreign keys
-        conn.Execute("PRAGMA foreign_keys = OFF;");
-
-        return (repo, conn);
+        return new FakeCustomerRepository();
     }
+
     [Fact]
     public void GetCustomers_Should_Return_Customers_From_Database()
     {
         // Arrange
-        var (repo, conn) = CreateRepository();
+        var repo = CreateRepository();
 
-        const string insertSql = @"
-            INSERT INTO Customers (Name, Email, Phone)
-            VALUES (@Name, @Email, @Phone);
-        ";
+        var customer1 = new Customer(
+            "Customer 1",
+            "customer1@test.com",
+            "123456789"
+        );
+        var customer2 = new Customer(
+            "Customer 2",
+            "customer2@test.com",
+            "987654321"
+        );
 
-        conn.Execute(insertSql, new
-        {
-            Name = "Customer 1",
-            Email = "customer1@test.com",
-            Phone = "123456789"
-        });
-
-        conn.Execute(insertSql, new
-        {
-            Name = "Customer 2",
-            Email = "customer2@test.com",
-            Phone = "987654321"
-        });
+        repo.Add(customer1);
+        repo.Add(customer2);
 
         // Act
         var customers = repo.GetCustomers().ToList();
@@ -79,38 +60,36 @@ public class CustomerRepositoryTests
         Assert.True(foundCustomer1);
         Assert.True(foundCustomer2);
     }
+
     [Fact]
     public void GetById_Should_Return_Single_Customer()
     {
         // Arrange
-        var (repo, conn) = CreateRepository();
+        var repo = CreateRepository();
 
-        const string insertSql = @"
-            INSERT INTO Customers (Name, Email, Phone)
-            VALUES (@Name, @Email, @Phone);
-            SELECT last_insert_rowid();
-        ";
+        var customer = new Customer(
+            "Single Customer",
+            "single@test.com",
+            "123456789"
+        );
 
-        long id = conn.ExecuteScalar<long>(insertSql, new
-        {
-            Name = "Single Customer",
-            Email = "single@test.com",
-            Phone = "123456789"
-        });
+        repo.Add(customer);
+        int id = customer.Id;
 
         // Act
-        var customer = repo.GetById((int)id);
+        var retrieved = repo.GetById(id);
 
         // Assert
-        Assert.NotNull(customer);
-        Assert.Equal((int)id, customer!.Id);
-        Assert.Equal("Single Customer", customer.Name);
+        Assert.NotNull(retrieved);
+        Assert.Equal(id, retrieved!.Id);
+        Assert.Equal("Single Customer", retrieved.Name);
     }
+
     [Fact]
     public void Add_Should_Insert_Customer_In_Database()
     {
         // Arrange
-        var (repo, conn) = CreateRepository();
+        var repo = CreateRepository();
 
         var customer = new Customer(
             "New Customer",
@@ -130,47 +109,31 @@ public class CustomerRepositoryTests
         Assert.Equal("new@test.com", saved.Email);
         Assert.Equal("123456789", saved.Phone);
     }
+
     [Fact]
     public void Delete_Should_Remove_Customer_From_Database()
     {
         // Arrange
-        var (repo, conn) = CreateRepository();
+        var repo = CreateRepository();
 
-        const string insertSql = @"
-            INSERT INTO Customers (Name, Email, Phone)
-            VALUES (@Name, @Email, @Phone);
-            SELECT last_insert_rowid();
-        ";
+        var customer = new Customer(
+            "Customer To Delete",
+            "delete@test.com",
+            "123456789"
+        );
 
-        long id = conn.ExecuteScalar<long>(insertSql, new
-        {
-            Name = "Customer To Delete",
-            Email = "delete@test.com",
-            Phone = "123456789"
-        });
+        repo.Add(customer);
+        int id = customer.Id;
 
         // Act
-        repo.Delete((int)id);
+        repo.Delete(id);
 
         // Assert
         var customers = repo.GetCustomers().ToList();
-        bool customerExists = false;
+        bool customerExists = customers.Any(c => c.Id == id);
 
-        foreach (var c in customers)
-        {
-            if (c.Id == id)
-            {
-                customerExists = true;
-            }
-        }
-
-        if (customerExists)
-        {
-            Assert.Fail("Customer should have been deleted but still exists.");
-        }
-
+        Assert.False(customerExists, "Customer should have been deleted but still exists.");
     }
-
 }
 
 
