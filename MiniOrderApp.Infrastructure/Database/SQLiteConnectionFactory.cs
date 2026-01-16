@@ -3,6 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace MiniOrderApp.Infrastructure.Database;
 
+// Creates database connections
 public class SQLiteConnectionFactory
 {
     private readonly string _connectionString;

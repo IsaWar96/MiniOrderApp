@@ -7,10 +7,10 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        var connectionString = "Data Source=miniorder.db";
+        // Connection string - database file will be saved as "miniorder.db" in the same folder as the program
+        string connectionString = "Data Source=miniorder.db";
 
         DbInitializer.Initialize(connectionString);
-
         var factory = new SQLiteConnectionFactory(connectionString);
 
         ICustomerRepository customerRepo = new CustomerRepository(factory);
