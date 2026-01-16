@@ -17,26 +17,66 @@ public class ReturnMenu
     public void Show()
     {
         Console.Clear();
-        Console.WriteLine("Return Orders \n -------");
+        Console.WriteLine("Return Order\n------------");
 
-        var orders = _orders.GetOrders();
+        var orders = _orders.GetOrders().ToList();
+        if (orders.Count == 0)
+        {
+            Console.WriteLine("No orders found. Please create an order first.");
+            Console.ReadKey();
+            return;
+        }
+
         foreach (var o in orders)
-            Console.WriteLine($"Order-ID: {o.Id} - Status: {o.Status} - Total: {o.TotalAmount}");
+            Console.WriteLine($"Order ID: {o.Id} - Status: {o.Status} - Total: {o.TotalAmount:C}");
 
-        Console.Write("Order ID to return: ");
-        var id = int.Parse(Console.ReadLine()!);
+        Console.Write("\nOrder ID to return: ");
+        if (!int.TryParse(Console.ReadLine(), out var id))
+        {
+            Console.WriteLine("Error: Invalid ID. Please enter a number.");
+            Console.ReadKey();
+            return;
+        }
+
+        var order = _orders.GetById(id);
+        if (order == null)
+        {
+            Console.WriteLine($"Error: Order with ID {id} was not found.");
+            Console.ReadKey();
+            return;
+        }
+
+        if (order.Status == OrderStatus.Returned)
+        {
+            Console.WriteLine($"Error: Order {id} is already marked as returned.");
+            Console.ReadKey();
+            return;
+        }
 
         Console.Write("Reason for return: ");
-        var reason = Console.ReadLine() ?? "";
+        var reason = Console.ReadLine()?.Trim() ?? "";
+
         Console.Write("Refunded amount: ");
-        var refund = decimal.Parse(Console.ReadLine()!);
+        if (!decimal.TryParse(Console.ReadLine(), out var refund) || refund < 0)
+        {
+            Console.WriteLine("Error: Refunded amount must be a valid number (0 or greater).");
+            Console.ReadKey();
+            return;
+        }
 
-        var ret = new Return(id, DateTime.Today, reason, refund);
+        try
+        {
+            var returnInfo = new Return(id, DateTime.Today, reason, refund);
+            _returns.AddReturn(returnInfo);
+            _orders.MarkAsReturned(id);
 
-        _returns.AddReturn(ret);
-        _orders.MarkAsReturned(id);
+            Console.WriteLine($"\nOrder {id} marked as returned. Refunded amount: {refund:C}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nError: {ex.Message}");
+        }
 
-        Console.WriteLine($"Returned order with ID: ({id}).");
         Console.ReadKey();
     }
 }

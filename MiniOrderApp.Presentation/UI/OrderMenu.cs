@@ -44,46 +44,131 @@ public class OrderMenu
 
     private void Create()
     {
+        Console.Clear();
+        Console.WriteLine("Create Order\n------------");
 
         var customers = _customers.GetCustomers().ToList();
+        if (customers.Count == 0)
+        {
+            Console.WriteLine("Error: No customers found. Please add a customer first.");
+            Console.ReadKey();
+            return;
+        }
+
         foreach (var c in customers)
             Console.WriteLine($"{c.Id}. {c.Name}");
 
-        Console.Write("Customer ID: ");
-        var custId = int.Parse(Console.ReadLine() ?? "1");
+        Console.Write("\nCustomer ID: ");
+        if (!int.TryParse(Console.ReadLine(), out var custId))
+        {
+            Console.WriteLine("Error: Invalid ID. Please enter a number.");
+            Console.ReadKey();
+            return;
+        }
+
+        var customer = _customers.GetById(custId);
+        if (customer == null)
+        {
+            Console.WriteLine($"Error: Customer with ID {custId} was not found.");
+            Console.ReadKey();
+            return;
+        }
+
+        Console.Write("How many products?: ");
+        if (!int.TryParse(Console.ReadLine(), out var count) || count <= 0)
+        {
+            Console.WriteLine("Error: Please enter a valid number greater than 0.");
+            Console.ReadKey();
+            return;
+        }
 
         var order = new Order(custId, DateTime.Today, 0);
 
-        Console.Write("How many products?: ");
-        var count = int.Parse(Console.ReadLine() ?? "1");
-
         for (int i = 0; i < count; i++)
         {
-            Console.Write("Name: ");
-            var name = Console.ReadLine()!;
-            Console.Write("Quantity: ");
-            var qty = int.Parse(Console.ReadLine()!);
-            Console.Write("Price: ");
-            var price = decimal.Parse(Console.ReadLine()!);
+            Console.WriteLine($"\nProduct {i + 1}:");
+            Console.Write("  Name: ");
+            var name = Console.ReadLine()?.Trim() ?? "";
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                Console.WriteLine("Error: Product name cannot be empty.");
+                Console.ReadKey();
+                return;
+            }
 
-            order.AddItem(new OrderItem(name, qty, price));
+            Console.Write("  Quantity: ");
+            if (!int.TryParse(Console.ReadLine(), out var qty) || qty <= 0)
+            {
+                Console.WriteLine("Error: Quantity must be a number greater than 0.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.Write("  Price: ");
+            if (!decimal.TryParse(Console.ReadLine(), out var price) || price < 0)
+            {
+                Console.WriteLine("Error: Price must be a valid number (0 or greater).");
+                Console.ReadKey();
+                return;
+            }
+
+            try
+            {
+                order.AddItem(new OrderItem(name, qty, price));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.ReadKey();
+                return;
+            }
         }
 
-        _orders.Add(order);
+        try
+        {
+            order.RecalculateTotal();
+            _orders.Add(order);
+            Console.WriteLine("\nOrder created successfully!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nError: {ex.Message}");
+        }
 
-        Console.WriteLine("Order added.");
         Console.ReadKey();
     }
 
     private void UpdateStatus()
     {
-        var list = _orders.GetOrders().ToList();
-        foreach (var o in list)
-            Console.WriteLine($"Order-ID: {o.Id}. Status: {o.Status}");
+        Console.Clear();
+        Console.WriteLine("Update Order Status\n-------------------");
 
-        Console.Write("Choose Order ID: ");
-        if (!int.TryParse(Console.ReadLine(), out var id))
+        var list = _orders.GetOrders().ToList();
+        if (list.Count == 0)
+        {
+            Console.WriteLine("No orders found. Please create an order first.");
+            Console.ReadKey();
             return;
+        }
+
+        foreach (var o in list)
+            Console.WriteLine($"Order ID: {o.Id}. Status: {o.Status}");
+
+        Console.Write("\nChoose Order ID: ");
+        if (!int.TryParse(Console.ReadLine(), out var id))
+        {
+            Console.WriteLine("Error: Invalid ID. Please enter a number.");
+            Console.ReadKey();
+            return;
+        }
+
+        var order = _orders.GetById(id);
+        if (order == null)
+        {
+            Console.WriteLine($"Error: Order with ID {id} was not found.");
+            Console.ReadKey();
+            return;
+        }
 
         string[] statusOptions = { "Created", "Paid", "Returned" };
         int choice = MenuHelper.ShowArrowMenu("Select Status\n------------", statusOptions);
@@ -99,37 +184,94 @@ public class OrderMenu
             _ => OrderStatus.Created
         };
 
-        var order = _orders.GetById(id);
-        if (order == null)
-            return;
+        try
+        {
+            order.SetStatus(status);
+            _orders.Update(order);
+            Console.WriteLine($"\nOrder status updated to {status}.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nError: {ex.Message}");
+        }
 
-        order.SetStatus(status);
-        _orders.Update(order);
-
-        Console.WriteLine($"Updated Status to {status}.");
         Console.ReadKey();
     }
 
     private void Delete()
     {
-        var list = _orders.GetOrders();
+        Console.Clear();
+        Console.WriteLine("Delete Order\n------------");
+
+        var list = _orders.GetOrders().ToList();
+        if (list.Count == 0)
+        {
+            Console.WriteLine("No orders found. Nothing to delete.");
+            Console.ReadKey();
+            return;
+        }
+
         foreach (var o in list)
-            Console.WriteLine($"Order-ID: {o.Id}. Total: {o.TotalAmount}");
+            Console.WriteLine($"Order ID: {o.Id}. Total: {o.TotalAmount:C}");
 
-        Console.Write("Choose ID to delete: ");
-        var id = int.Parse(Console.ReadLine()!);
+        Console.Write("\nOrder ID to delete: ");
+        if (!int.TryParse(Console.ReadLine(), out var id))
+        {
+            Console.WriteLine("Error: Invalid ID. Please enter a number.");
+            Console.ReadKey();
+            return;
+        }
 
-        _orders.Delete(id);
+        var order = _orders.GetById(id);
+        if (order == null)
+        {
+            Console.WriteLine($"Error: Order with ID {id} was not found.");
+            Console.ReadKey();
+            return;
+        }
 
-        Console.WriteLine($"Deleted: ({id}).");
+        Console.WriteLine($"\nAre you sure you want to delete Order {id} (Total: {order.TotalAmount:C})? (y/n): ");
+        var confirm = Console.ReadLine()?.Trim().ToLower();
+
+        if (confirm == "y" || confirm == "yes")
+        {
+            try
+            {
+                _orders.Delete(id);
+                Console.WriteLine("Order deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Delete cancelled.");
+        }
+
         Console.ReadKey();
     }
 
     private void List()
     {
-        var list = _orders.GetOrders();
-        foreach (var o in list)
-            Console.WriteLine($"Order {o.Id} - Customer {o.CustomerId} - Total {o.TotalAmount}");
+        Console.Clear();
+        Console.WriteLine("Order List\n----------");
+
+        var list = _orders.GetOrders().ToList();
+        if (list.Count == 0)
+        {
+            Console.WriteLine("No orders found. Please create an order first.");
+        }
+        else
+        {
+            foreach (var o in list)
+            {
+                var customer = _customers.GetById(o.CustomerId);
+                var customerName = customer?.Name ?? $"ID {o.CustomerId}";
+                Console.WriteLine($"Order {o.Id} - Customer: {customerName} - Status: {o.Status} - Total: {o.TotalAmount:C}");
+            }
+        }
 
         Console.ReadKey();
     }
