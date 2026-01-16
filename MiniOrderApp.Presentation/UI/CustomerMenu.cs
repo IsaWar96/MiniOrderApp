@@ -16,34 +16,25 @@ public class CustomerMenu
     {
         while (true)
         {
-            Console.Clear();
-            Console.WriteLine("Customers \n ------");
-            Console.WriteLine("1. Add");
-            Console.WriteLine("2. Update");
-            Console.WriteLine("3. Delete");
-            Console.WriteLine("4. List");
-            Console.WriteLine("0. Back");
-            Console.Write("Choice: ");
+            string[] options = { "Add", "Update", "Delete", "List", "Back" };
+            int choice = MenuHelper.ShowArrowMenu("Customers\n------", options);
 
-            var choice = Console.ReadLine();
+            if (choice == -1 || choice == 4)
+                return;
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     Add();
                     break;
-                case "2":
+                case 1:
                     Update();
                     break;
-                case "3":
+                case 2:
                     Delete();
                     break;
-                case "4":
+                case 3:
                     List();
-                    break;
-                case "0":
-                    return;
-                default:
                     break;
             }
         }

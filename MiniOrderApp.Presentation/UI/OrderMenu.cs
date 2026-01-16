@@ -18,33 +18,26 @@ public class OrderMenu
     {
         while (true)
         {
-            Console.Clear();
-            Console.WriteLine("Orders \n -------");
-            Console.WriteLine("1. Create");
-            Console.WriteLine("2. Update Status");
-            Console.WriteLine("3. Delete");
-            Console.WriteLine("4. List");
-            Console.WriteLine("0. Back");
-            Console.Write("Choice: ");
+            string[] options = { "Create", "Update Status", "Delete", "List", "Back" };
+            int choice = MenuHelper.ShowArrowMenu("Orders\n-------", options);
 
-            var choice = Console.ReadLine();
+            if (choice == -1 || choice == 4)
+                return;
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     Create();
                     break;
-                case "2":
+                case 1:
                     UpdateStatus();
                     break;
-                case "3":
+                case 2:
                     Delete();
                     break;
-                case "4":
+                case 3:
                     List();
                     break;
-                case "0":
-                    return;
             }
         }
     }
@@ -89,38 +82,28 @@ public class OrderMenu
             Console.WriteLine($"Order-ID: {o.Id}. Status: {o.Status}");
 
         Console.Write("Choose Order ID: ");
-        var id = int.Parse(Console.ReadLine()!);
+        if (!int.TryParse(Console.ReadLine(), out var id))
+            return;
 
-        Console.WriteLine("1. Created");
-        Console.WriteLine("2. Paid");
-        Console.WriteLine("3. Returned");
+        string[] statusOptions = { "Created", "Paid", "Returned" };
+        int choice = MenuHelper.ShowArrowMenu("Select Status\n------------", statusOptions);
 
-        var choice = Console.ReadLine();
+        if (choice == -1)
+            return;
 
-        OrderStatus status;
-
-        switch (choice)
+        OrderStatus status = choice switch
         {
-            case "1":
-                status = OrderStatus.Created;
-                break;
-
-            case "2":
-                status = OrderStatus.Paid;
-                break;
-
-            case "3":
-                status = OrderStatus.Returned;
-                break;
-
-            default:
-                status = OrderStatus.Created;
-                break;
-        }
+            0 => OrderStatus.Created,
+            1 => OrderStatus.Paid,
+            2 => OrderStatus.Returned,
+            _ => OrderStatus.Created
+        };
 
         var order = _orders.GetById(id);
-        order!.SetStatus(status);
+        if (order == null)
+            return;
 
+        order.SetStatus(status);
         _orders.Update(order);
 
         Console.WriteLine($"Updated Status to {status}.");

@@ -14,36 +14,27 @@ public class MainMenu
         _orders = orders;
         _returns = returns;
     }
+
     public void Start()
     {
         while (true)
         {
-            Console.Clear();
-            Console.WriteLine("Mini OrderApp \n=========");
-            Console.WriteLine("1. Customers");
-            Console.WriteLine("2. Orders");
-            Console.WriteLine("3. Returns");
-            Console.WriteLine("0. Exit");
+            string[] options = { "Customers", "Orders", "Returns", "Exit" };
+            int choice = MenuHelper.ShowArrowMenu("Mini OrderApp\n=========", options);
 
-            Console.Write("Choice: ");
-            var choice = Console.ReadLine();
+            if (choice == -1 || choice == 3)
+                return;
 
             switch (choice)
             {
-                case "1":
+                case 0:
                     new CustomerMenu(_customers).Show();
                     break;
-                case "2":
+                case 1:
                     new OrderMenu(_orders, _customers).Show();
                     break;
-                case "3":
+                case 2:
                     new ReturnMenu(_returns, _orders).Show();
-                    break;
-                case "0":
-                    return;
-                default:
-                    Console.WriteLine("Invalid option.");
-                    Console.ReadKey();
                     break;
             }
         }
