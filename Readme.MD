@@ -22,7 +22,7 @@ The application follows a clean architecture pattern with separate projects for 
 - **MiniOrderApp.Domain**: Core business entities and interfaces
 - **MiniOrderApp.Infrastructure**: EF Core DbContext and repository implementations
 - **MiniOrderApp.Api**: ASP.NET Core Web API with controllers and frontend
-- **MiniOrderApp.Presentation**: Console-based UI (legacy)
+- **MiniOrderApp.Presentation**: Console-based UI (**LEGACY - Not maintained, incompatible with current EF Core setup**)
 - **MiniOrderApp.Tests**: Integration tests
 
 ### Technology Stack
@@ -100,7 +100,10 @@ The application uses SQLite with a connection string configured in `appsettings.
 }
 ```
 
-The database is automatically created on first run.
+The database is automatically created on first run with **sample seed data** including:
+- 5 sample customers
+- 3 sample orders with order items
+- Ready to test immediately without manual data entry
 
 ## Development
 
