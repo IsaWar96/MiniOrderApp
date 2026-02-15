@@ -37,7 +37,6 @@ public class Return
     }
 
     private decimal _refundedAmount;
-    [Required]
     public decimal RefundedAmount
     {
         get => _refundedAmount;
