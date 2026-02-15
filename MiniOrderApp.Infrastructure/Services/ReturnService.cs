@@ -1,5 +1,6 @@
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Infrastructure.Database;
 
 namespace MiniOrderApp.Infrastructure.Services;
 
@@ -7,11 +8,13 @@ public class ReturnService : IReturnService
 {
     private readonly IReturnRepository _returnRepository;
     private readonly IOrderRepository _orderRepository;
+    private readonly ApplicationDbContext _context;
 
-    public ReturnService(IReturnRepository returnRepository, IOrderRepository orderRepository)
+    public ReturnService(IReturnRepository returnRepository, IOrderRepository orderRepository, ApplicationDbContext context)
     {
         _returnRepository = returnRepository;
         _orderRepository = orderRepository;
+        _context = context;
     }
 
     public async Task<IEnumerable<Return>> GetAllReturnsAsync()
@@ -33,11 +36,6 @@ public class ReturnService : IReturnService
             throw new KeyNotFoundException($"Order with ID {orderId} not found.");
         }
 
-        if (order.Status == OrderStatus.Returned)
-        {
-            throw new InvalidOperationException($"Order with ID {orderId} has already been returned.");
-        }
-
         var existingReturn = await _returnRepository.GetByOrderIdAsync(orderId);
 
         if (existingReturn != null)
@@ -45,15 +43,18 @@ public class ReturnService : IReturnService
             throw new InvalidOperationException($"A return already exists for order ID {orderId}.");
         }
 
-        if (string.IsNullOrWhiteSpace(reason))
-        {
-            throw new ArgumentException("Return reason is required.", nameof(reason));
-        }
+        // Domain entity will validate reason and other invariants
+        var returnInfo = new Return(orderId, DateTime.UtcNow, reason, order.TotalAmount);
 
-        var returnInfo = new Return(orderId, DateTime.Now, reason, order.TotalAmount);
+        // Mark order as returned using domain method
+        order.MarkAsReturned();
 
+        // Add both changes to the context
         await _returnRepository.AddReturnAsync(returnInfo);
-        await _orderRepository.MarkAsReturnedAsync(orderId);
+        await _orderRepository.UpdateAsync(order);
+
+        // Save changes once - ensures transactional consistency
+        await _context.SaveChangesAsync();
 
         return returnInfo;
     }

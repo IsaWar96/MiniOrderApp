@@ -1,5 +1,6 @@
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Infrastructure.Database;
 
 namespace MiniOrderApp.Infrastructure.Services;
 
@@ -7,11 +8,13 @@ public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly ICustomerRepository _customerRepository;
+    private readonly ApplicationDbContext _context;
 
-    public OrderService(IOrderRepository orderRepository, ICustomerRepository customerRepository)
+    public OrderService(IOrderRepository orderRepository, ICustomerRepository customerRepository, ApplicationDbContext context)
     {
         _orderRepository = orderRepository;
         _customerRepository = customerRepository;
+        _context = context;
     }
 
     public async Task<IEnumerable<Order>> GetAllOrdersAsync()
@@ -54,33 +57,16 @@ public class OrderService : IOrderService
             throw new ArgumentException("Order must have at least one item.", nameof(items));
         }
 
-        foreach (var item in items)
-        {
-            if (string.IsNullOrWhiteSpace(item.ProductName))
-            {
-                throw new ArgumentException("Product name is required for all order items.");
-            }
-
-            if (item.Quantity <= 0)
-            {
-                throw new ArgumentException("Quantity must be greater than zero for all order items.");
-            }
-
-            if (item.UnitPrice < 0)
-            {
-                throw new ArgumentException("Unit price cannot be negative for order items.");
-            }
-        }
-
         var totalAmount = items.Sum(item => item.Quantity * item.UnitPrice);
-        var order = new Order(customerId, DateTime.Now, totalAmount);
-
+        var order = new Order(customerId, DateTime.UtcNow, totalAmount);
+        
         foreach (var item in items)
         {
             order.AddItem(item);
         }
 
         await _orderRepository.AddAsync(order);
+        await _context.SaveChangesAsync();
         return order;
     }
 
@@ -112,6 +98,7 @@ public class OrderService : IOrderService
         existingOrder.UpdateDetails(customerId, orderDate, status);
 
         await _orderRepository.UpdateAsync(existingOrder);
+        await _context.SaveChangesAsync();
         return existingOrder;
     }
 
@@ -130,6 +117,7 @@ public class OrderService : IOrderService
         }
 
         await _orderRepository.DeleteAsync(id);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(int orderId)
@@ -163,11 +151,9 @@ public class OrderService : IOrderService
             throw new KeyNotFoundException($"Order with ID {orderId} not found.");
         }
 
-        if (order.Status == OrderStatus.Returned)
-        {
-            throw new InvalidOperationException($"Order with ID {orderId} is already marked as returned.");
-        }
+        order.MarkAsReturned();
 
-        await _orderRepository.MarkAsReturnedAsync(orderId);
+        await _orderRepository.UpdateAsync(order);
+        await _context.SaveChangesAsync();
     }
 }

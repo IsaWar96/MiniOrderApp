@@ -1,15 +1,18 @@
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Infrastructure.Database;
 
 namespace MiniOrderApp.Infrastructure.Services;
 
 public class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository;
+    private readonly ApplicationDbContext _context;
 
-    public CustomerService(ICustomerRepository customerRepository)
+    public CustomerService(ICustomerRepository customerRepository, ApplicationDbContext context)
     {
         _customerRepository = customerRepository;
+        _context = context;
     }
 
     public async Task<IEnumerable<Customer>> GetAllCustomersAsync()
@@ -36,23 +39,9 @@ public class CustomerService : ICustomerService
 
     public async Task<Customer> CreateCustomerAsync(string name, string email, string phone)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Customer name is required.", nameof(name));
-        }
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new ArgumentException("Customer email is required.", nameof(email));
-        }
-
-        if (string.IsNullOrWhiteSpace(phone))
-        {
-            throw new ArgumentException("Customer phone is required.", nameof(phone));
-        }
-
         var customer = new Customer(name, email, phone);
         await _customerRepository.AddAsync(customer);
+        await _context.SaveChangesAsync();
         return customer;
     }
 
@@ -70,24 +59,10 @@ public class CustomerService : ICustomerService
             throw new KeyNotFoundException($"Customer with ID {id} not found.");
         }
 
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Customer name is required.", nameof(name));
-        }
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new ArgumentException("Customer email is required.", nameof(email));
-        }
-
-        if (string.IsNullOrWhiteSpace(phone))
-        {
-            throw new ArgumentException("Customer phone is required.", nameof(phone));
-        }
-
         existingCustomer.UpdateDetails(name, email, phone);
 
         await _customerRepository.UpdateAsync(existingCustomer);
+        await _context.SaveChangesAsync();
 
         return existingCustomer;
     }
@@ -107,5 +82,6 @@ public class CustomerService : ICustomerService
         }
 
         await _customerRepository.DeleteAsync(id);
+        await _context.SaveChangesAsync();
     }
 }
