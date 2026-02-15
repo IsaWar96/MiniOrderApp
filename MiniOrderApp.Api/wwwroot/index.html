@@ -127,15 +127,15 @@
                     <form id="returnForm" onsubmit="saveReturn(event)">
                         <div class="form-group">
                             <label for="returnOrderId">Order ID *</label>
-                            <input type="number" id="returnOrderId" required>
+                            <input type="number" id="returnOrderId" min="1" required>
                         </div>
                         <div class="form-group">
-                            <label for="returnReason">Reason</label>
-                            <textarea id="returnReason" rows="3"></textarea>
+                            <label for="returnReason">Reason *</label>
+                            <textarea id="returnReason" rows="3" minlength="2" maxlength="500" required></textarea>
                         </div>
                         <div class="form-group">
                             <label for="returnAmount">Refunded Amount *</label>
-                            <input type="number" id="returnAmount" step="0.01" required>
+                            <input type="number" id="returnAmount" step="0.01" min="0" required>
                         </div>
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary">Create Return</button>

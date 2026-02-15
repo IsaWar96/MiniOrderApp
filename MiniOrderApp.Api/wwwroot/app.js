@@ -371,10 +371,29 @@ function cancelReturnForm() {
 async function saveReturn(event) {
     event.preventDefault();
     
+    const orderId = parseInt(document.getElementById('returnOrderId').value);
+    const reason = document.getElementById('returnReason').value;
+    const refundedAmount = parseFloat(document.getElementById('returnAmount').value);
+    
+    if (orderId <= 0) {
+        showNotification('Order ID must be greater than 0', 'error');
+        return;
+    }
+    
+    if (reason.length < 2) {
+        showNotification('Reason must be at least 2 characters', 'error');
+        return;
+    }
+    
+    if (refundedAmount < 0) {
+        showNotification('Refunded amount cannot be negative', 'error');
+        return;
+    }
+    
     const returnData = {
-        orderId: parseInt(document.getElementById('returnOrderId').value),
-        reason: document.getElementById('returnReason').value,
-        refundedAmount: parseFloat(document.getElementById('returnAmount').value)
+        orderId: orderId,
+        reason: reason,
+        refundedAmount: refundedAmount
     };
 
     try {

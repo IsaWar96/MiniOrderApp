@@ -68,4 +68,14 @@ public class ReturnsController : ControllerBase
 }
 
 // DTOs
-public record ReturnCreateDto(int OrderId, string Reason, decimal RefundedAmount);
+public record ReturnCreateDto(
+    [Range(1, int.MaxValue, ErrorMessage = "Order ID must be greater than 0")]
+    int OrderId,
+    
+    [MinLength(2, ErrorMessage = "Reason must be at least 2 characters")]
+    [MaxLength(500)]
+    string Reason,
+    
+    [Range(0, double.MaxValue, ErrorMessage = "Refunded amount cannot be negative")]
+    decimal RefundedAmount
+);

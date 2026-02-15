@@ -10,7 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("AppDb") 
+    options.UseSqlite(builder.Configuration.GetConnectionString("AppDb")
         ?? throw new InvalidOperationException("Database connection string not found.")));
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
@@ -36,8 +36,10 @@ using (var scope = app.Services.CreateScope())
     DbSeeder.SeedData(dbContext);
 }
 
+
 if (app.Environment.IsDevelopment())
 {
+    /// Enable Swagger in development for API documentation and testing
     app.UseSwagger();
     app.UseSwaggerUI();
 }
