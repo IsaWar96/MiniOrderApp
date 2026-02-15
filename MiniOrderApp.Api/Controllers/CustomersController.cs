@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
