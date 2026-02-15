@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://localhost:7145/api'; // Update this port if needed
+const API_BASE_URL = 'https://localhost:5242/api';
 
 // Navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
