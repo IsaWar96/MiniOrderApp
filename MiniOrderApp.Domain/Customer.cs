@@ -1,11 +1,21 @@
-﻿namespace MiniOrderApp.Domain;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MiniOrderApp.Domain;
 
 public class Customer
 {
     public int Id { get; set; }
-    public string Name { get; private set; } = "";
-    public string Email { get; private set; } = "";
-    public string Phone { get; private set; } = "";
+    
+    [Required]
+    [MaxLength(200)]
+    public string Name { get; set; } = "";
+    
+    [MaxLength(200)]
+    public string Email { get; set; } = "";
+    
+    [Required]
+    [MaxLength(50)]
+    public string Phone { get; set; } = "";
 
     public Customer(string name, string email, string phone)
     {

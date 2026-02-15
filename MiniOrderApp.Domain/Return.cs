@@ -1,12 +1,22 @@
-﻿namespace MiniOrderApp.Domain;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MiniOrderApp.Domain;
 
 public class Return
 {
     public int Id { get; set; }
-    public int OrderId { get; private set; }
-    public DateTime ReturnDate { get; private set; }
-    public string Reason { get; private set; } = "";
-    public decimal RefundedAmount { get; private set; }
+    
+    [Required]
+    public int OrderId { get; set; }
+    
+    [Required]
+    public DateTime ReturnDate { get; set; }
+    
+    [MaxLength(500)]
+    public string Reason { get; set; } = "";
+    
+    [Required]
+    public decimal RefundedAmount { get; set; }
 
     public Return(int orderId, DateTime returnDate, string reason, decimal refundedAmount)
     {

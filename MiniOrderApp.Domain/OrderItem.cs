@@ -1,12 +1,23 @@
-﻿namespace MiniOrderApp.Domain;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MiniOrderApp.Domain;
 
 public class OrderItem
 {
     public int Id { get; set; }
+    
+    [Required]
     public int OrderId { get; set; }
-    public string ProductName { get; private set; } = "";
-    public int Quantity { get; private set; }
-    public decimal UnitPrice { get; private set; }
+    
+    [Required]
+    [MaxLength(200)]
+    public string ProductName { get; set; } = "";
+    
+    [Required]
+    public int Quantity { get; set; }
+    
+    [Required]
+    public decimal UnitPrice { get; set; }
 
     public decimal LineTotal => Quantity * UnitPrice;
 

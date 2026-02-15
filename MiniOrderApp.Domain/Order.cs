@@ -1,12 +1,22 @@
-﻿namespace MiniOrderApp.Domain;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MiniOrderApp.Domain;
 
 public class Order
 {
     public int Id { get; set; }
-    public int CustomerId { get; private set; }
-    public DateTime OrderDate { get; private set; }
-    public OrderStatus Status { get; private set; }
-    public decimal TotalAmount { get; private set; }
+    
+    [Required]
+    public int CustomerId { get; set; }
+    
+    [Required]
+    public DateTime OrderDate { get; set; }
+    
+    [Required]
+    public OrderStatus Status { get; set; }
+    
+    [Required]
+    public decimal TotalAmount { get; set; }
 
     // Holds items in the order
     public List<OrderItem> Items { get; } = new();
