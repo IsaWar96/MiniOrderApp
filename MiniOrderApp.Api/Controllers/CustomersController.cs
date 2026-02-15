@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
-using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Infrastructure.Interfaces;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -9,18 +9,18 @@ namespace MiniOrderApp.Api.Controllers;
 [Route("api/[controller]")]
 public class CustomersController : ControllerBase
 {
-    private readonly ICustomerRepository _customerRepository;
+    private readonly ICustomerService _customerService;
 
-    public CustomersController(ICustomerRepository customerRepository)
+    public CustomersController(ICustomerService customerService)
     {
-        _customerRepository = customerRepository;
+        _customerService = customerService;
     }
 
     // GET: api/customers
     [HttpGet]
     public ActionResult<IEnumerable<Customer>> GetAll()
     {
-        var customers = _customerRepository.GetCustomers();
+        var customers = _customerService.GetAllCustomers();
         return Ok(customers);
     }
 
@@ -28,11 +28,7 @@ public class CustomersController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<Customer> GetById(int id)
     {
-        var customer = _customerRepository.GetById(id);
-        if (customer == null)
-        {
-            return NotFound($"Customer with ID {id} not found.");
-        }
+        var customer = _customerService.GetCustomerById(id);
         return Ok(customer);
     }
 
@@ -41,25 +37,16 @@ public class CustomersController : ControllerBase
     public ActionResult<Customer> Create([FromBody] CustomerCreateDto dto)
     {
         var customer = new Customer(dto.Name, dto.Email, dto.Phone);
-        _customerRepository.Add(customer);
-        return CreatedAtAction(nameof(GetById), new { id = customer.Id }, customer);
+        var createdCustomer = _customerService.CreateCustomer(customer);
+        return CreatedAtAction(nameof(GetById), new { id = createdCustomer.Id }, createdCustomer);
     }
 
     // PUT: api/customers/5
     [HttpPut("{id}")]
     public ActionResult Update(int id, [FromBody] CustomerUpdateDto dto)
     {
-        var customer = _customerRepository.GetById(id);
-        if (customer == null)
-        {
-            return NotFound($"Customer with ID {id} not found.");
-        }
-
-        customer.Name = dto.Name;
-        customer.Email = dto.Email;
-        customer.Phone = dto.Phone;
-
-        _customerRepository.Update(customer);
+        var customer = new Customer(dto.Name, dto.Email, dto.Phone);
+        _customerService.UpdateCustomer(id, customer);
         return NoContent();
     }
 
@@ -67,13 +54,7 @@ public class CustomersController : ControllerBase
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        var customer = _customerRepository.GetById(id);
-        if (customer == null)
-        {
-            return NotFound($"Customer with ID {id} not found.");
-        }
-
-        _customerRepository.Delete(id);
+        _customerService.DeleteCustomer(id);
         return NoContent();
     }
 }

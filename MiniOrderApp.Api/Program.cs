@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
+using MiniOrderApp.Infrastructure.Interfaces;
 using MiniOrderApp.Infrastructure.Repositories;
+using MiniOrderApp.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IReturnRepository, ReturnRepository>();
+
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IReturnService, ReturnService>();
 
 builder.Services.AddCors(options =>
 {

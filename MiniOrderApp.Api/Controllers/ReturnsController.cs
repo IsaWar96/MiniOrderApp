@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
-using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Infrastructure.Interfaces;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -9,20 +9,18 @@ namespace MiniOrderApp.Api.Controllers;
 [Route("api/[controller]")]
 public class ReturnsController : ControllerBase
 {
-    private readonly IReturnRepository _returnRepository;
-    private readonly IOrderRepository _orderRepository;
+    private readonly IReturnService _returnService;
 
-    public ReturnsController(IReturnRepository returnRepository, IOrderRepository orderRepository)
+    public ReturnsController(IReturnService returnService)
     {
-        _returnRepository = returnRepository;
-        _orderRepository = orderRepository;
+        _returnService = returnService;
     }
 
     // GET: api/returns
     [HttpGet]
     public ActionResult<IEnumerable<Return>> GetAll()
     {
-        var returns = _returnRepository.GetAll();
+        var returns = _returnService.GetAllReturns();
         return Ok(returns);
     }
 
@@ -30,11 +28,7 @@ public class ReturnsController : ControllerBase
     [HttpGet("order/{orderId}")]
     public ActionResult<Return> GetByOrderId(int orderId)
     {
-        var returnInfo = _returnRepository.GetByOrderId(orderId);
-        if (returnInfo == null)
-        {
-            return NotFound($"No return found for order ID {orderId}.");
-        }
+        var returnInfo = _returnService.GetReturnByOrderId(orderId);
         return Ok(returnInfo);
     }
 
@@ -42,19 +36,9 @@ public class ReturnsController : ControllerBase
     [HttpPost]
     public ActionResult<Return> Create([FromBody] ReturnCreateDto dto)
     {
-        var order = _orderRepository.GetById(dto.OrderId);
-        if (order == null)
-        {
-            return BadRequest($"Order with ID {dto.OrderId} not found.");
-        }
-
         var returnInfo = new Return(dto.OrderId, DateTime.Now, dto.Reason, dto.RefundedAmount);
-        _returnRepository.AddReturn(returnInfo);
-
-        // Mark the order as returned
-        _orderRepository.MarkAsReturned(dto.OrderId);
-
-        return CreatedAtAction(nameof(GetByOrderId), new { orderId = returnInfo.OrderId }, returnInfo);
+        var createdReturn = _returnService.CreateReturn(returnInfo);
+        return CreatedAtAction(nameof(GetByOrderId), new { orderId = createdReturn.OrderId }, createdReturn);
     }
 }
 

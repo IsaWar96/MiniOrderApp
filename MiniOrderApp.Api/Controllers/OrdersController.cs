@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
-using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Infrastructure.Interfaces;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -8,20 +8,18 @@ namespace MiniOrderApp.Api.Controllers;
 [Route("api/[controller]")]
 public class OrdersController : ControllerBase
 {
-    private readonly IOrderRepository _orderRepository;
-    private readonly ICustomerRepository _customerRepository;
+    private readonly IOrderService _orderService;
 
-    public OrdersController(IOrderRepository orderRepository, ICustomerRepository customerRepository)
+    public OrdersController(IOrderService orderService)
     {
-        _orderRepository = orderRepository;
-        _customerRepository = customerRepository;
+        _orderService = orderService;
     }
 
     // GET: api/orders
     [HttpGet]
     public ActionResult<IEnumerable<Order>> GetAll()
     {
-        var orders = _orderRepository.GetOrders();
+        var orders = _orderService.GetAllOrders();
         return Ok(orders);
     }
 
@@ -29,11 +27,7 @@ public class OrdersController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<Order> GetById(int id)
     {
-        var order = _orderRepository.GetById(id);
-        if (order == null)
-        {
-            return NotFound($"Order with ID {id} not found.");
-        }
+        var order = _orderService.GetOrderById(id);
         return Ok(order);
     }
 
@@ -41,13 +35,7 @@ public class OrdersController : ControllerBase
     [HttpGet("{id}/items")]
     public ActionResult<IEnumerable<OrderItem>> GetOrderItems(int id)
     {
-        var order = _orderRepository.GetById(id);
-        if (order == null)
-        {
-            return NotFound($"Order with ID {id} not found.");
-        }
-
-        var items = _orderRepository.GetItemsForOrder(id);
+        var items = _orderService.GetOrderItems(id);
         return Ok(items);
     }
 
@@ -55,12 +43,6 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public ActionResult<Order> Create([FromBody] OrderCreateDto dto)
     {
-        var customer = _customerRepository.GetById(dto.CustomerId);
-        if (customer == null)
-        {
-            return BadRequest($"Customer with ID {dto.CustomerId} not found.");
-        }
-
         var order = new Order(dto.CustomerId, DateTime.Now, 0);
 
         foreach (var itemDto in dto.Items)
@@ -69,22 +51,17 @@ public class OrdersController : ControllerBase
             order.AddItem(item);
         }
 
-        _orderRepository.Add(order);
-        return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
+        var createdOrder = _orderService.CreateOrder(order);
+        return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, createdOrder);
     }
 
     // PUT: api/orders/5/status
     [HttpPut("{id}/status")]
     public ActionResult UpdateStatus(int id, [FromBody] OrderStatusUpdateDto dto)
     {
-        var order = _orderRepository.GetById(id);
-        if (order == null)
-        {
-            return NotFound($"Order with ID {id} not found.");
-        }
-
+        var order = _orderService.GetOrderById(id);
         order.SetStatus(dto.Status);
-        _orderRepository.Update(order);
+        _orderService.UpdateOrder(id, order);
         return NoContent();
     }
 
@@ -92,13 +69,7 @@ public class OrdersController : ControllerBase
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        var order = _orderRepository.GetById(id);
-        if (order == null)
-        {
-            return NotFound($"Order with ID {id} not found.");
-        }
-
-        _orderRepository.Delete(id);
+        _orderService.DeleteOrder(id);
         return NoContent();
     }
 }
