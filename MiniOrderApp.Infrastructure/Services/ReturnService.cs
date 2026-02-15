@@ -57,7 +57,7 @@ public class ReturnService : IReturnService
         }
 
         returnInfo.ReturnDate = DateTime.Now;
-        returnInfo.RefundAmount = order.TotalAmount;
+        returnInfo.RefundedAmount = order.TotalAmount;
 
         _returnRepository.AddReturn(returnInfo);
         _orderRepository.MarkAsReturned(returnInfo.OrderId);

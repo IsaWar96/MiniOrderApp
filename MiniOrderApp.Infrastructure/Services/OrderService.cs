@@ -55,12 +55,12 @@ public class OrderService : IOrderService
             throw new KeyNotFoundException($"Customer with ID {order.CustomerId} not found.");
         }
 
-        if (order.OrderItems == null || !order.OrderItems.Any())
+        if (order.Items == null || !order.Items.Any())
         {
-            throw new ArgumentException("Order must have at least one item.", nameof(order.OrderItems));
+            throw new ArgumentException("Order must have at least one item.", nameof(order.Items));
         }
 
-        foreach (var item in order.OrderItems)
+        foreach (var item in order.Items)
         {
             if (string.IsNullOrWhiteSpace(item.ProductName))
             {
@@ -78,7 +78,7 @@ public class OrderService : IOrderService
             }
         }
 
-        order.TotalAmount = order.OrderItems.Sum(item => item.Quantity * item.UnitPrice);
+        order.TotalAmount = order.Items.Sum(item => item.Quantity * item.UnitPrice);
         order.OrderDate = DateTime.Now;
         order.Status = OrderStatus.Created;
 
@@ -116,12 +116,12 @@ public class OrderService : IOrderService
             throw new KeyNotFoundException($"Customer with ID {order.CustomerId} not found.");
         }
 
-        if (order.OrderItems == null || !order.OrderItems.Any())
+        if (order.Items == null || !order.Items.Any())
         {
-            throw new ArgumentException("Order must have at least one item.", nameof(order.OrderItems));
+            throw new ArgumentException("Order must have at least one item.", nameof(order.Items));
         }
 
-        foreach (var item in order.OrderItems)
+        foreach (var item in order.Items)
         {
             if (string.IsNullOrWhiteSpace(item.ProductName))
             {
@@ -139,7 +139,7 @@ public class OrderService : IOrderService
             }
         }
 
-        order.TotalAmount = order.OrderItems.Sum(item => item.Quantity * item.UnitPrice);
+        order.TotalAmount = order.Items.Sum(item => item.Quantity * item.UnitPrice);
         order.Id = id;
 
         _orderRepository.Update(order);
