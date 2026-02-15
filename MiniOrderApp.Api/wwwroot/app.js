@@ -93,9 +93,17 @@ async function saveCustomer(event) {
     event.preventDefault();
     
     const customerId = document.getElementById('customerId').value;
+    const email = document.getElementById('customerEmail').value;
+    
+    // Validate email format if provided
+    if (email && !isValidEmail(email)) {
+        showNotification('Invalid email format', 'error');
+        return;
+    }
+    
     const customerData = {
         name: document.getElementById('customerName').value,
-        email: document.getElementById('customerEmail').value,
+        email: email,
         phone: document.getElementById('customerPhone').value
     };
 
@@ -413,6 +421,12 @@ async function saveReturn(event) {
     } catch (error) {
         showNotification('Error creating return: ' + error.message, 'error');
     }
+}
+
+// Email validation helper
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
 
 // Initialize the app

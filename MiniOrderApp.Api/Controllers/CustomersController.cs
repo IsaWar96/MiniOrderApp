@@ -121,5 +121,14 @@ public class CustomersController : ControllerBase
 }
 
 // DTOs
-public record CustomerCreateDto(string Name, string Email, string Phone);
-public record CustomerUpdateDto(string Name, string Email, string Phone);
+public record CustomerCreateDto(
+    [Required][MaxLength(200)] string Name,
+    [EmailAddress(ErrorMessage = "Invalid email format")][MaxLength(200)] string Email,
+    [Required][MaxLength(50)] string Phone
+);
+
+public record CustomerUpdateDto(
+    [Required][MaxLength(200)] string Name,
+    [EmailAddress(ErrorMessage = "Invalid email format")][MaxLength(200)] string Email,
+    [Required][MaxLength(50)] string Phone
+);
