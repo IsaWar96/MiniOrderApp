@@ -14,50 +14,50 @@ public class OrderRepository : IOrderRepository
         _context = context;
     }
 
-    public IEnumerable<Order> GetOrders()
+    public async Task<IEnumerable<Order>> GetOrdersAsync()
     {
-        return _context.Orders.Include(o => o.Items).ToList();
+        return await _context.Orders.Include(o => o.Items).ToListAsync();
     }
 
-    public Order? GetById(int id)
+    public async Task<Order?> GetByIdAsync(int id)
     {
-        return _context.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == id);
+        return await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
     }
 
-    public IEnumerable<OrderItem> GetItemsForOrder(int orderId)
+    public async Task<IEnumerable<OrderItem>> GetItemsForOrderAsync(int orderId)
     {
-        return _context.OrderItems.Where(i => i.OrderId == orderId).ToList();
+        return await _context.OrderItems.Where(i => i.OrderId == orderId).ToListAsync();
     }
 
-    public void Add(Order order)
+    public async Task AddAsync(Order order)
     {
         _context.Orders.Add(order);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void Update(Order order)
+    public async Task UpdateAsync(Order order)
     {
         _context.Orders.Update(order);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
-        var order = _context.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == id);
+        var order = await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
         if (order != null)
         {
             _context.Orders.Remove(order);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 
-    public void MarkAsReturned(int orderId)
+    public async Task MarkAsReturnedAsync(int orderId)
     {
-        var order = _context.Orders.Find(orderId);
+        var order = await _context.Orders.FindAsync(orderId);
         if (order != null)
         {
             order.SetStatus(OrderStatus.Returned);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }

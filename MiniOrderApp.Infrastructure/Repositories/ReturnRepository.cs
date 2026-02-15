@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
@@ -13,19 +14,19 @@ public class ReturnRepository : IReturnRepository
         _context = context;
     }
 
-    public IEnumerable<Return> GetAll()
+    public async Task<IEnumerable<Return>> GetAllAsync()
     {
-        return _context.Returns.ToList();
+        return await _context.Returns.ToListAsync();
     }
 
-    public void AddReturn(Return returnInfo)
+    public async Task AddReturnAsync(Return returnInfo)
     {
         _context.Returns.Add(returnInfo);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public Return? GetByOrderId(int orderId)
+    public async Task<Return?> GetByOrderIdAsync(int orderId)
     {
-        return _context.Returns.FirstOrDefault(r => r.OrderId == orderId);
+        return await _context.Returns.FirstOrDefaultAsync(r => r.OrderId == orderId);
     }
 }

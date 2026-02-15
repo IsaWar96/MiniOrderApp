@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
@@ -13,35 +14,35 @@ public class CustomerRepository : ICustomerRepository
         _context = context;
     }
 
-    public IEnumerable<Customer> GetCustomers()
+    public async Task<IEnumerable<Customer>> GetCustomersAsync()
     {
-        return _context.Customers.ToList();
+        return await _context.Customers.ToListAsync();
     }
 
-    public Customer? GetById(int id)
+    public async Task<Customer?> GetByIdAsync(int id)
     {
-        return _context.Customers.Find(id);
+        return await _context.Customers.FindAsync(id);
     }
 
-    public void Add(Customer customer)
+    public async Task AddAsync(Customer customer)
     {
         _context.Customers.Add(customer);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void Update(Customer customer)
+    public async Task UpdateAsync(Customer customer)
     {
         _context.Customers.Update(customer);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
-        var customer = _context.Customers.Find(id);
+        var customer = await _context.Customers.FindAsync(id);
         if (customer != null)
         {
             _context.Customers.Remove(customer);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }
