@@ -12,19 +12,19 @@ public class CustomerService : ICustomerService
         _customerRepository = customerRepository;
     }
 
-    public IEnumerable<Customer> GetAllCustomers()
+    public async Task<IEnumerable<Customer>> GetAllCustomersAsync()
     {
-        return _customerRepository.GetCustomers();
+        return await _customerRepository.GetCustomersAsync();
     }
 
-    public Customer GetCustomerById(int id)
+    public async Task<Customer> GetCustomerByIdAsync(int id)
     {
         if (id <= 0)
         {
             throw new ArgumentException("Customer ID must be greater than zero.", nameof(id));
         }
 
-        var customer = _customerRepository.GetById(id);
+        var customer = await _customerRepository.GetByIdAsync(id);
 
         if (customer == null)
         {
@@ -34,85 +34,78 @@ public class CustomerService : ICustomerService
         return customer;
     }
 
-    public Customer CreateCustomer(Customer customer)
+    public async Task<Customer> CreateCustomerAsync(string name, string email, string phone)
     {
-        if (customer == null)
+        if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentNullException(nameof(customer), "Customer cannot be null.");
+            throw new ArgumentException("Customer name is required.", nameof(name));
         }
 
-        if (string.IsNullOrWhiteSpace(customer.Name))
+        if (string.IsNullOrWhiteSpace(email))
         {
-            throw new ArgumentException("Customer name is required.", nameof(customer.Name));
+            throw new ArgumentException("Customer email is required.", nameof(email));
         }
 
-        if (string.IsNullOrWhiteSpace(customer.Email))
+        if (string.IsNullOrWhiteSpace(phone))
         {
-            throw new ArgumentException("Customer email is required.", nameof(customer.Email));
+            throw new ArgumentException("Customer phone is required.", nameof(phone));
         }
 
-        if (string.IsNullOrWhiteSpace(customer.Phone))
-        {
-            throw new ArgumentException("Customer phone is required.", nameof(customer.Phone));
-        }
-
-        _customerRepository.Add(customer);
+        var customer = new Customer(name, email, phone);
+        await _customerRepository.AddAsync(customer);
         return customer;
     }
 
-    public Customer UpdateCustomer(int id, Customer customer)
+    public async Task<Customer> UpdateCustomerAsync(int id, string name, string email, string phone)
     {
         if (id <= 0)
         {
-            throw new ArgumentException("Customer ID must be greater than zero.", nameof(id));
+            throw new ArgumentException("Invalid id", nameof(id));
         }
 
-        if (customer == null)
-        {
-            throw new ArgumentNullException(nameof(customer), "Customer cannot be null.");
-        }
-
-        var existingCustomer = _customerRepository.GetById(id);
+        var existingCustomer = await _customerRepository.GetByIdAsync(id);
 
         if (existingCustomer == null)
         {
             throw new KeyNotFoundException($"Customer with ID {id} not found.");
         }
 
-        if (string.IsNullOrWhiteSpace(customer.Name))
+        if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Customer name is required.", nameof(customer.Name));
+            throw new ArgumentException("Customer name is required.", nameof(name));
         }
 
-        if (string.IsNullOrWhiteSpace(customer.Email))
+        if (string.IsNullOrWhiteSpace(email))
         {
-            throw new ArgumentException("Customer email is required.", nameof(customer.Email));
+            throw new ArgumentException("Customer email is required.", nameof(email));
         }
 
-        if (string.IsNullOrWhiteSpace(customer.Phone))
+        if (string.IsNullOrWhiteSpace(phone))
         {
-            throw new ArgumentException("Customer phone is required.", nameof(customer.Phone));
+            throw new ArgumentException("Customer phone is required.", nameof(phone));
         }
 
-        customer.Id = id;
-        _customerRepository.Update(customer);
-        return customer;
+        existingCustomer.UpdateDetails(name, email, phone);
+
+        await _customerRepository.UpdateAsync(existingCustomer);
+
+        return existingCustomer;
     }
 
-    public void DeleteCustomer(int id)
+    public async Task DeleteCustomerAsync(int id)
     {
         if (id <= 0)
         {
             throw new ArgumentException("Customer ID must be greater than zero.", nameof(id));
         }
 
-        var customer = _customerRepository.GetById(id);
+        var customer = await _customerRepository.GetByIdAsync(id);
 
         if (customer == null)
         {
             throw new KeyNotFoundException($"Customer with ID {id} not found.");
         }
 
-        _customerRepository.Delete(id);
+        await _customerRepository.DeleteAsync(id);
     }
 }

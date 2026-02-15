@@ -14,19 +14,19 @@ public class OrderService : IOrderService
         _customerRepository = customerRepository;
     }
 
-    public IEnumerable<Order> GetAllOrders()
+    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
     {
-        return _orderRepository.GetOrders();
+        return await _orderRepository.GetOrdersAsync();
     }
 
-    public Order GetOrderById(int id)
+    public async Task<Order> GetOrderByIdAsync(int id)
     {
         if (id <= 0)
         {
             throw new ArgumentException("Order ID must be greater than zero.", nameof(id));
         }
 
-        var order = _orderRepository.GetById(id);
+        var order = await _orderRepository.GetByIdAsync(id);
 
         if (order == null)
         {
@@ -36,30 +36,25 @@ public class OrderService : IOrderService
         return order;
     }
 
-    public Order CreateOrder(Order order)
+    public async Task<Order> CreateOrderAsync(int customerId, List<OrderItem> items)
     {
-        if (order == null)
+        if (customerId <= 0)
         {
-            throw new ArgumentNullException(nameof(order), "Order cannot be null.");
+            throw new ArgumentException("Customer ID must be greater than zero.", nameof(customerId));
         }
 
-        if (order.CustomerId <= 0)
-        {
-            throw new ArgumentException("Customer ID must be greater than zero.", nameof(order.CustomerId));
-        }
-
-        var customer = _customerRepository.GetById(order.CustomerId);
+        var customer = await _customerRepository.GetByIdAsync(customerId);
         if (customer == null)
         {
-            throw new KeyNotFoundException($"Customer with ID {order.CustomerId} not found.");
+            throw new KeyNotFoundException($"Customer with ID {customerId} not found.");
         }
 
-        if (order.Items == null || !order.Items.Any())
+        if (items == null || !items.Any())
         {
-            throw new ArgumentException("Order must have at least one item.", nameof(order.Items));
+            throw new ArgumentException("Order must have at least one item.", nameof(items));
         }
 
-        foreach (var item in order.Items)
+        foreach (var item in items)
         {
             if (string.IsNullOrWhiteSpace(item.ProductName))
             {
@@ -77,116 +72,91 @@ public class OrderService : IOrderService
             }
         }
 
-        order.TotalAmount = order.Items.Sum(item => item.Quantity * item.UnitPrice);
-        order.OrderDate = DateTime.Now;
-        order.Status = OrderStatus.Created;
+        var totalAmount = items.Sum(item => item.Quantity * item.UnitPrice);
+        var order = new Order(customerId, DateTime.Now, totalAmount);
 
-        _orderRepository.Add(order);
+        foreach (var item in items)
+        {
+            order.AddItem(item);
+        }
+
+        await _orderRepository.AddAsync(order);
         return order;
     }
 
-    public Order UpdateOrder(int id, Order order)
+    public async Task<Order> UpdateOrderAsync(int id, int customerId, DateTime orderDate, OrderStatus status)
     {
         if (id <= 0)
         {
             throw new ArgumentException("Order ID must be greater than zero.", nameof(id));
         }
 
-        if (order == null)
-        {
-            throw new ArgumentNullException(nameof(order), "Order cannot be null.");
-        }
-
-        var existingOrder = _orderRepository.GetById(id);
+        var existingOrder = await _orderRepository.GetByIdAsync(id);
 
         if (existingOrder == null)
         {
             throw new KeyNotFoundException($"Order with ID {id} not found.");
         }
 
-        if (order.CustomerId <= 0)
+        if (customerId <= 0)
         {
-            throw new ArgumentException("Customer ID must be greater than zero.", nameof(order.CustomerId));
+            throw new ArgumentException("Customer ID must be greater than zero.", nameof(customerId));
         }
 
-        var customer = _customerRepository.GetById(order.CustomerId);
+        var customer = await _customerRepository.GetByIdAsync(customerId);
         if (customer == null)
         {
-            throw new KeyNotFoundException($"Customer with ID {order.CustomerId} not found.");
+            throw new KeyNotFoundException($"Customer with ID {customerId} not found.");
         }
 
-        if (order.Items == null || !order.Items.Any())
-        {
-            throw new ArgumentException("Order must have at least one item.", nameof(order.Items));
-        }
+        existingOrder.UpdateDetails(customerId, orderDate, status);
 
-        foreach (var item in order.Items)
-        {
-            if (string.IsNullOrWhiteSpace(item.ProductName))
-            {
-                throw new ArgumentException("Product name is required for all order items.");
-            }
-
-            if (item.Quantity <= 0)
-            {
-                throw new ArgumentException("Quantity must be greater than zero for all order items.");
-            }
-
-            if (item.UnitPrice < 0)
-            {
-                throw new ArgumentException("Unit price cannot be negative for order items.");
-            }
-        }
-
-        order.TotalAmount = order.Items.Sum(item => item.Quantity * item.UnitPrice);
-        order.Id = id;
-
-        _orderRepository.Update(order);
-        return order;
+        await _orderRepository.UpdateAsync(existingOrder);
+        return existingOrder;
     }
 
-    public void DeleteOrder(int id)
+    public async Task DeleteOrderAsync(int id)
     {
         if (id <= 0)
         {
             throw new ArgumentException("Order ID must be greater than zero.", nameof(id));
         }
 
-        var order = _orderRepository.GetById(id);
+        var order = await _orderRepository.GetByIdAsync(id);
 
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {id} not found.");
         }
 
-        _orderRepository.Delete(id);
+        await _orderRepository.DeleteAsync(id);
     }
 
-    public IEnumerable<OrderItem> GetOrderItems(int orderId)
+    public async Task<IEnumerable<OrderItem>> GetOrderItemsAsync(int orderId)
     {
         if (orderId <= 0)
         {
             throw new ArgumentException("Order ID must be greater than zero.", nameof(orderId));
         }
 
-        var order = _orderRepository.GetById(orderId);
+        var order = await _orderRepository.GetByIdAsync(orderId);
 
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {orderId} not found.");
         }
 
-        return _orderRepository.GetItemsForOrder(orderId);
+        return await _orderRepository.GetItemsForOrderAsync(orderId);
     }
 
-    public void MarkOrderAsReturned(int orderId)
+    public async Task MarkOrderAsReturnedAsync(int orderId)
     {
         if (orderId <= 0)
         {
             throw new ArgumentException("Order ID must be greater than zero.", nameof(orderId));
         }
 
-        var order = _orderRepository.GetById(orderId);
+        var order = await _orderRepository.GetByIdAsync(orderId);
 
         if (order == null)
         {
@@ -198,6 +168,6 @@ public class OrderService : IOrderService
             throw new InvalidOperationException($"Order with ID {orderId} is already marked as returned.");
         }
 
-        _orderRepository.MarkAsReturned(orderId);
+        await _orderRepository.MarkAsReturnedAsync(orderId);
     }
 }

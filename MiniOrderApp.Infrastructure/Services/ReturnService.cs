@@ -14,71 +14,65 @@ public class ReturnService : IReturnService
         _orderRepository = orderRepository;
     }
 
-    public IEnumerable<Return> GetAllReturns()
+    public async Task<IEnumerable<Return>> GetAllReturnsAsync()
     {
-        return _returnRepository.GetAll();
+        return await _returnRepository.GetAllAsync();
     }
 
-    public Return CreateReturn(Return returnInfo)
-    {
-        if (returnInfo == null)
-        {
-            throw new ArgumentNullException(nameof(returnInfo), "Return information cannot be null.");
-        }
-
-        if (returnInfo.OrderId <= 0)
-        {
-            throw new ArgumentException("Order ID must be greater than zero.", nameof(returnInfo.OrderId));
-        }
-
-        var order = _orderRepository.GetById(returnInfo.OrderId);
-
-        if (order == null)
-        {
-            throw new KeyNotFoundException($"Order with ID {returnInfo.OrderId} not found.");
-        }
-
-        if (order.Status == OrderStatus.Returned)
-        {
-            throw new InvalidOperationException($"Order with ID {returnInfo.OrderId} has already been returned.");
-        }
-
-        var existingReturn = _returnRepository.GetByOrderId(returnInfo.OrderId);
-
-        if (existingReturn != null)
-        {
-            throw new InvalidOperationException($"A return already exists for order ID {returnInfo.OrderId}.");
-        }
-
-        if (string.IsNullOrWhiteSpace(returnInfo.Reason))
-        {
-            throw new ArgumentException("Return reason is required.", nameof(returnInfo.Reason));
-        }
-
-        returnInfo.ReturnDate = DateTime.Now;
-        returnInfo.RefundedAmount = order.TotalAmount;
-
-        _returnRepository.AddReturn(returnInfo);
-        _orderRepository.MarkAsReturned(returnInfo.OrderId);
-
-        return returnInfo;
-    }
-
-    public Return GetReturnByOrderId(int orderId)
+    public async Task<Return> CreateReturnAsync(int orderId, string reason)
     {
         if (orderId <= 0)
         {
             throw new ArgumentException("Order ID must be greater than zero.", nameof(orderId));
         }
 
-        var order = _orderRepository.GetById(orderId);
+        var order = await _orderRepository.GetByIdAsync(orderId);
 
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {orderId} not found.");
         }
 
-        var returnInfo = _returnRepository.GetByOrderId(orderId);
+        if (order.Status == OrderStatus.Returned)
+        {
+            throw new InvalidOperationException($"Order with ID {orderId} has already been returned.");
+        }
+
+        var existingReturn = await _returnRepository.GetByOrderIdAsync(orderId);
+
+        if (existingReturn != null)
+        {
+            throw new InvalidOperationException($"A return already exists for order ID {orderId}.");
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            throw new ArgumentException("Return reason is required.", nameof(reason));
+        }
+
+        var returnInfo = new Return(orderId, DateTime.Now, reason, order.TotalAmount);
+
+        await _returnRepository.AddReturnAsync(returnInfo);
+        await _orderRepository.MarkAsReturnedAsync(orderId);
+
+        return returnInfo;
+    }
+
+    public async Task<Return> GetReturnByOrderIdAsync(int orderId)
+    {
+        if (orderId <= 0)
+        {
+            throw new ArgumentException("Order ID must be greater than zero.", nameof(orderId));
+        }
+
+        var order = await _orderRepository.GetByIdAsync(orderId);
+
+        if (order == null)
+        {
+            throw new KeyNotFoundException($"Order with ID {orderId} not found.");
+        }
+
+        var returnInfo = await _returnRepository.GetByOrderIdAsync(orderId);
 
         if (returnInfo == null)
         {
