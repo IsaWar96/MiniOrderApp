@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
-using MiniOrderApp.Infrastructure.Interfaces;
+using MiniOrderApp.Domain.Interfaces;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -41,7 +41,7 @@ public class OrdersController : ControllerBase
 
     // POST: api/orders
     [HttpPost]
-    public ActionResult<Order> Create([FromBody] OrderCreateDto dto)
+    public ActionResult<Order> Create(OrderCreateDto dto)
     {
         var order = new Order(dto.CustomerId, DateTime.Now, 0);
 
@@ -57,7 +57,7 @@ public class OrdersController : ControllerBase
 
     // PUT: api/orders/5/status
     [HttpPut("{id}/status")]
-    public ActionResult UpdateStatus(int id, [FromBody] OrderStatusUpdateDto dto)
+    public ActionResult UpdateStatus(int id, OrderStatusUpdateDto dto)
     {
         var order = _orderService.GetOrderById(id);
         order.SetStatus(dto.Status);

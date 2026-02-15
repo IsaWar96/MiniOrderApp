@@ -1,6 +1,5 @@
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
-using MiniOrderApp.Infrastructure.Interfaces;
 
 namespace MiniOrderApp.Infrastructure.Services;
 

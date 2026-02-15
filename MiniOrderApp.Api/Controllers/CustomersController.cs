@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
-using MiniOrderApp.Infrastructure.Interfaces;
+using MiniOrderApp.Domain.Interfaces;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -34,7 +34,7 @@ public class CustomersController : ControllerBase
 
     // POST: api/customers
     [HttpPost]
-    public ActionResult<Customer> Create([FromBody] CustomerCreateDto dto)
+    public ActionResult<Customer> Create(CustomerCreateDto dto)
     {
         var customer = new Customer(dto.Name, dto.Email, dto.Phone);
         var createdCustomer = _customerService.CreateCustomer(customer);
@@ -43,7 +43,7 @@ public class CustomersController : ControllerBase
 
     // PUT: api/customers/5
     [HttpPut("{id}")]
-    public ActionResult Update(int id, [FromBody] CustomerUpdateDto dto)
+    public ActionResult Update(int id, CustomerUpdateDto dto)
     {
         var customer = new Customer(dto.Name, dto.Email, dto.Phone);
         _customerService.UpdateCustomer(id, customer);

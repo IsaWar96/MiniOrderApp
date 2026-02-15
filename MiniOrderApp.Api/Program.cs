@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
-using MiniOrderApp.Infrastructure.Interfaces;
 using MiniOrderApp.Infrastructure.Repositories;
 using MiniOrderApp.Infrastructure.Services;
 

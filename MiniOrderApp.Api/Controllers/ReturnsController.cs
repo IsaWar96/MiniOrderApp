@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
-using MiniOrderApp.Infrastructure.Interfaces;
+using MiniOrderApp.Domain.Interfaces;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -34,7 +34,7 @@ public class ReturnsController : ControllerBase
 
     // POST: api/returns
     [HttpPost]
-    public ActionResult<Return> Create([FromBody] ReturnCreateDto dto)
+    public ActionResult<Return> Create(ReturnCreateDto dto)
     {
         var returnInfo = new Return(dto.OrderId, DateTime.Now, dto.Reason, dto.RefundedAmount);
         var createdReturn = _returnService.CreateReturn(returnInfo);

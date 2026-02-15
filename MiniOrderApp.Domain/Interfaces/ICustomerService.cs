@@ -1,6 +1,6 @@
 using MiniOrderApp.Domain;
 
-namespace MiniOrderApp.Infrastructure.Interfaces;
+namespace MiniOrderApp.Domain.Interfaces;
 
 public interface ICustomerService
 {
