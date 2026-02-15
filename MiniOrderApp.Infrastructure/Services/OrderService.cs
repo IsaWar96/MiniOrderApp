@@ -59,7 +59,7 @@ public class OrderService : IOrderService
 
         var totalAmount = items.Sum(item => item.Quantity * item.UnitPrice);
         var order = new Order(customerId, DateTime.UtcNow, totalAmount);
-        
+
         foreach (var item in items)
         {
             order.AddItem(item);
