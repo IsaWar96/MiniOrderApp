@@ -4,37 +4,67 @@ namespace MiniOrderApp.Domain;
 
 public class Return
 {
-    public int Id { get; set; }
+    public int Id { get; private set; }
 
+    private int _orderId;
+
+    public int OrderId
+    {
+        get => _orderId;
+        private set
+        {
+            if (value <= 0)
+                throw new ArgumentException("Order ID must be greater than 0", nameof(OrderId));
+            _orderId = value;
+        }
+    }
+
+    public DateTime ReturnDate { get; private set; }
+
+    private string _reason = string.Empty;
+
+    public string Reason
+    {
+        get => _reason;
+        private set
+        {
+            if (!string.IsNullOrWhiteSpace(value) && value.Length < 2)
+                throw new ArgumentException("Reason must be at least 2 characters", nameof(Reason));
+            if (value != null && value.Length > 500)
+                throw new ArgumentException("Reason cannot exceed 500 characters", nameof(Reason));
+            _reason = value ?? string.Empty;
+        }
+    }
+
+    private decimal _refundedAmount;
     [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "Order ID must be greater than 0")]
-    public int OrderId { get; set; }
-
-    [Required]
-    public DateTime ReturnDate { get; set; }
-
-    [MinLength(2, ErrorMessage = "Reason must be at least 2 characters")]
-    [MaxLength(500)]
-    public string Reason { get; set; } = "";
-
-    [Required]
-    public decimal RefundedAmount { get; set; }
+    public decimal RefundedAmount
+    {
+        get => _refundedAmount;
+        private set
+        {
+            if (value < 0)
+                throw new ArgumentException("Refunded amount cannot be negative", nameof(RefundedAmount));
+            _refundedAmount = value;
+        }
+    }
 
     public Return(int orderId, DateTime returnDate, string reason, decimal refundedAmount)
     {
-        if (orderId <= 0)
-            throw new ArgumentException("Order ID must be greater than 0", nameof(orderId));
-        if (refundedAmount < 0)
-            throw new ArgumentException("Refunded amount cannot be negative", nameof(refundedAmount));
-        if (!string.IsNullOrEmpty(reason) && reason.Length < 2)
-            throw new ArgumentException("Reason must be at least 2 characters", nameof(reason));
-
         OrderId = orderId;
         ReturnDate = returnDate;
-        Reason = reason ?? "";
+        Reason = reason;
         RefundedAmount = refundedAmount;
     }
-    // For Dapper
+
+    public void UpdateDetails(DateTime returnDate, string reason, decimal refundedAmount)
+    {
+        ReturnDate = returnDate;
+        Reason = reason;
+        RefundedAmount = refundedAmount;
+    }
+
+    // Parameterless constructor for EF
     public Return()
     {
     }

@@ -4,48 +4,60 @@ namespace MiniOrderApp.Domain;
 
 public class Customer
 {
-    public int Id { get; set; }
+    public int Id { get; private set; }
 
-    [Required]
-    [MaxLength(200)]
-    public string Name { get; set; } = "";
+    private string _name = string.Empty;
+    public string Name
+    {
+        get => _name;
+        private set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Name is required", nameof(Name));
+            _name = value;
+        }
+    }
 
-    [EmailAddress(ErrorMessage = "Invalid email format")]
-    [MaxLength(200)]
-    public string Email { get; set; } = "";
+    private string _email = string.Empty;
+    public string Email
+    {
+        get => _email;
+        private set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Email is required", nameof(Email));
+            if (value.Length > 200)
+                throw new ArgumentException("Email cannot exceed 200 characters", nameof(Email));
+            _email = value;
+        }
+    }
 
-    [Required]
-    [MaxLength(50)]
-    public string Phone { get; set; } = "";
+    private string _phone = string.Empty;
+    public string Phone
+    {
+        get => _phone;
+        private set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Phone is required", nameof(Phone));
+            _phone = value;
+        }
+    }
 
     public Customer(string name, string email, string phone)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name is required", nameof(name));
-        if (string.IsNullOrWhiteSpace(phone))
-            throw new ArgumentException("Phone is required", nameof(phone));
-        if (!string.IsNullOrEmpty(email) && !IsValidEmail(email))
-            throw new ArgumentException("Invalid email format", nameof(email));
-
+        Name = name;
+        Email = email;
+        Phone = phone;
+    }
+    public void UpdateDetails(string name, string email, string phone)
+    {
         Name = name;
         Email = email;
         Phone = phone;
     }
 
-    private static bool IsValidEmail(string email)
-    {
-        try
-        {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    // For Dapper
+    // Parameterless constructor for EF Core
     public Customer()
     {
     }

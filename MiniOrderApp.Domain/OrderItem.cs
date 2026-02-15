@@ -4,37 +4,68 @@ namespace MiniOrderApp.Domain;
 
 public class OrderItem
 {
-    public int Id { get; set; }
+    public int Id { get; private set; }
 
     [Required]
-    public int OrderId { get; set; }
+    public int OrderId { get; private set; }
 
-    [Required]
-    [MaxLength(200)]
-    public string ProductName { get; set; } = "";
+    private string _productName = string.Empty;
 
-    [Required]
-    public int Quantity { get; set; }
+    public string ProductName
+    {
+        get => _productName;
+        private set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Product name is required", nameof(ProductName));
+            if (value.Length > 200)
+                throw new ArgumentException("Product name cannot exceed 200 characters", nameof(ProductName));
+            _productName = value;
+        }
+    }
 
-    [Required]
-    public decimal UnitPrice { get; set; }
+    private int _quantity;
+
+    public int Quantity
+    {
+        get => _quantity;
+        private set
+        {
+            if (value <= 0)
+                throw new ArgumentException("Quantity must be positive", nameof(Quantity));
+            _quantity = value;
+        }
+    }
+
+    private decimal _unitPrice;
+    public decimal UnitPrice
+    {
+        get => _unitPrice;
+        private set
+        {
+            if (value < 0)
+                throw new ArgumentException("Unit price cannot be negative", nameof(UnitPrice));
+            _unitPrice = value;
+        }
+    }
 
     public decimal LineTotal => Quantity * UnitPrice;
 
     public OrderItem(string productName, int quantity, decimal unitPrice)
     {
-        if (string.IsNullOrWhiteSpace(productName))
-            throw new ArgumentException("Product name is required", nameof(productName));
-        if (quantity <= 0)
-            throw new ArgumentException("Quantity must be positive", nameof(quantity));
-        if (unitPrice < 0)
-            throw new ArgumentException("Unit price cannot be negative", nameof(unitPrice));
-
         ProductName = productName;
         Quantity = quantity;
         UnitPrice = unitPrice;
     }
-    // For Dapper
+
+    public void UpdateDetails(string productName, int quantity, decimal unitPrice)
+    {
+        ProductName = productName;
+        Quantity = quantity;
+        UnitPrice = unitPrice;
+    }
+
+    // Parameterless constructor for EF
     public OrderItem()
     {
     }
