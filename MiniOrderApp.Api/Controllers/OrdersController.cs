@@ -17,59 +17,57 @@ public class OrdersController : ControllerBase
 
     // GET: api/orders
     [HttpGet]
-    public ActionResult<IEnumerable<Order>> GetAll()
+    public async Task<ActionResult<IEnumerable<Order>>> GetAll()
     {
-        var orders = _orderService.GetAllOrders();
+        var orders = await _orderService.GetAllOrdersAsync();
         return Ok(orders);
     }
 
     // GET: api/orders/5
     [HttpGet("{id}")]
-    public ActionResult<Order> GetById(int id)
+    public async Task<ActionResult<Order>> GetById(int id)
     {
-        var order = _orderService.GetOrderById(id);
+        var order = await _orderService.GetOrderByIdAsync(id);
         return Ok(order);
     }
 
     // GET: api/orders/5/items
     [HttpGet("{id}/items")]
-    public ActionResult<IEnumerable<OrderItem>> GetOrderItems(int id)
+    public async Task<ActionResult<IEnumerable<OrderItem>>> GetOrderItems(int id)
     {
-        var items = _orderService.GetOrderItems(id);
+        var items = await _orderService.GetOrderItemsAsync(id);
         return Ok(items);
     }
 
     // POST: api/orders
     [HttpPost]
-    public ActionResult<Order> Create(OrderCreateDto dto)
+    public async Task<ActionResult<Order>> Create(OrderCreateDto dto)
     {
-        var order = new Order(dto.CustomerId, DateTime.Now, 0);
-
+        var items = new List<OrderItem>();
         foreach (var itemDto in dto.Items)
         {
             var item = new OrderItem(itemDto.ProductName, itemDto.Quantity, itemDto.UnitPrice);
-            order.AddItem(item);
+            items.Add(item);
         }
 
-        var createdOrder = _orderService.CreateOrder(order);
+        var createdOrder = await _orderService.CreateOrderAsync(dto.CustomerId, items);
         return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, createdOrder);
     }
 
     // PUT: api/orders/5/status
     [HttpPut("{id}/status")]
-    public ActionResult UpdateStatus(int id, OrderStatusUpdateDto dto)
+    public async Task<ActionResult> UpdateStatus(int id, OrderStatusUpdateDto dto)
     {
-        var order = _orderService.GetOrderById(id);
-        order.SetStatus(dto.Status);
-        _orderService.UpdateOrder(id, order);
+        var order = await _orderService.GetOrderByIdAsync(id);
+        await _orderService.UpdateOrderAsync(id, order.CustomerId, order.OrderDate, dto.Status);
         return NoContent();
     }
 
     // DELETE: api/orders/5
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
-        _orderService.DeleteOrder(id);
+        await _orderService.DeleteOrderAsync(id);
         return NoContent();
     }
 }

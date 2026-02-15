@@ -18,26 +18,25 @@ public class ReturnsController : ControllerBase
 
     // GET: api/returns
     [HttpGet]
-    public ActionResult<IEnumerable<Return>> GetAll()
+    public async Task<ActionResult<IEnumerable<Return>>> GetAll()
     {
-        var returns = _returnService.GetAllReturns();
+        var returns = await _returnService.GetAllReturnsAsync();
         return Ok(returns);
     }
 
     // GET: api/returns/order/5
     [HttpGet("order/{orderId}")]
-    public ActionResult<Return> GetByOrderId(int orderId)
+    public async Task<ActionResult<Return>> GetByOrderId(int orderId)
     {
-        var returnInfo = _returnService.GetReturnByOrderId(orderId);
+        var returnInfo = await _returnService.GetReturnByOrderIdAsync(orderId);
         return Ok(returnInfo);
     }
 
     // POST: api/returns
     [HttpPost]
-    public ActionResult<Return> Create(ReturnCreateDto dto)
+    public async Task<ActionResult<Return>> Create(ReturnCreateDto dto)
     {
-        var returnInfo = new Return(dto.OrderId, DateTime.Now, dto.Reason, dto.RefundedAmount);
-        var createdReturn = _returnService.CreateReturn(returnInfo);
+        var createdReturn = await _returnService.CreateReturnAsync(dto.OrderId, dto.Reason);
         return CreatedAtAction(nameof(GetByOrderId), new { orderId = createdReturn.OrderId }, createdReturn);
     }
 }
@@ -49,8 +48,5 @@ public record ReturnCreateDto(
 
     [MinLength(2, ErrorMessage = "Reason must be at least 2 characters")]
     [MaxLength(500)]
-    string Reason,
-
-    [Range(0, double.MaxValue, ErrorMessage = "Refunded amount cannot be negative")]
-    decimal RefundedAmount
+    string Reason
 );

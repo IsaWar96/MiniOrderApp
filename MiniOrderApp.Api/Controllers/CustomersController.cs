@@ -18,43 +18,41 @@ public class CustomersController : ControllerBase
 
     // GET: api/customers
     [HttpGet]
-    public ActionResult<IEnumerable<Customer>> GetAll()
+    public async Task<ActionResult<IEnumerable<Customer>>> GetAll()
     {
-        var customers = _customerService.GetAllCustomers();
+        var customers = await _customerService.GetAllCustomersAsync();
         return Ok(customers);
     }
 
     // GET: api/customers/5
     [HttpGet("{id}")]
-    public ActionResult<Customer> GetById(int id)
+    public async Task<ActionResult<Customer>> GetById(int id)
     {
-        var customer = _customerService.GetCustomerById(id);
+        var customer = await _customerService.GetCustomerByIdAsync(id);
         return Ok(customer);
     }
 
     // POST: api/customers
     [HttpPost]
-    public ActionResult<Customer> Create(CustomerCreateDto dto)
+    public async Task<ActionResult<Customer>> Create(CustomerCreateDto dto)
     {
-        var customer = new Customer(dto.Name, dto.Email, dto.Phone);
-        var createdCustomer = _customerService.CreateCustomer(customer);
+        var createdCustomer = await _customerService.CreateCustomerAsync(dto.Name, dto.Email, dto.Phone);
         return CreatedAtAction(nameof(GetById), new { id = createdCustomer.Id }, createdCustomer);
     }
 
     // PUT: api/customers/5
     [HttpPut("{id}")]
-    public ActionResult Update(int id, CustomerUpdateDto dto)
+    public async Task<ActionResult> Update(int id, CustomerUpdateDto dto)
     {
-        var customer = new Customer(dto.Name, dto.Email, dto.Phone);
-        _customerService.UpdateCustomer(id, customer);
+        await _customerService.UpdateCustomerAsync(id, dto.Name, dto.Email, dto.Phone);
         return NoContent();
     }
 
     // DELETE: api/customers/5
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
-        _customerService.DeleteCustomer(id);
+        await _customerService.DeleteCustomerAsync(id);
         return NoContent();
     }
 }
