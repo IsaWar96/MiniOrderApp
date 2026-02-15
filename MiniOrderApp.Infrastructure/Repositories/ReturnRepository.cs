@@ -1,5 +1,3 @@
-using System.Data;
-using Dapper;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
@@ -8,44 +6,21 @@ namespace MiniOrderApp.Infrastructure.Repositories;
 
 public class ReturnRepository : IReturnRepository
 {
-    private readonly SQLiteConnectionFactory _factory;
+    private readonly ApplicationDbContext _context;
 
-    public ReturnRepository(SQLiteConnectionFactory factory)
+    public ReturnRepository(ApplicationDbContext context)
     {
-        _factory = factory;
+        _context = context;
     }
 
     public void AddReturn(Return returnInfo)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            INSERT INTO Returns (OrderId, ReturnDate, Reason, RefundedAmount)
-            VALUES (@OrderId, @ReturnDate, @Reason, @RefundedAmount);";
-
-        db.Execute(sql, new
-        {
-            OrderId = returnInfo.OrderId,
-            ReturnDate = returnInfo.ReturnDate.ToString("yyyy-MM-dd"),
-            Reason = returnInfo.Reason,
-            RefundedAmount = returnInfo.RefundedAmount
-        });
+        _context.Returns.Add(returnInfo);
+        _context.SaveChanges();
     }
 
     public Return? GetByOrderId(int orderId)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            SELECT
-                ReturnId AS Id,
-                OrderId,
-                ReturnDate,
-                Reason,
-                RefundedAmount
-            FROM Returns
-            WHERE OrderId = @OrderId;";
-
-        return db.QueryFirstOrDefault<Return>(sql, new { OrderId = orderId });
+        return _context.Returns.FirstOrDefault(r => r.OrderId == orderId);
     }
 }

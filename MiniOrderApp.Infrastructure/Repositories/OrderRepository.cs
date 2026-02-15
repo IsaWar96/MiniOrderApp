@@ -1,5 +1,4 @@
-using System.Data;
-using Dapper;
+using Microsoft.EntityFrameworkCore;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
 using MiniOrderApp.Infrastructure.Database;
@@ -8,143 +7,57 @@ namespace MiniOrderApp.Infrastructure.Repositories;
 
 public class OrderRepository : IOrderRepository
 {
-    private readonly SQLiteConnectionFactory _factory;
+    private readonly ApplicationDbContext _context;
 
-    public OrderRepository(SQLiteConnectionFactory factory)
+    public OrderRepository(ApplicationDbContext context)
     {
-        _factory = factory;
+        _context = context;
     }
 
     public IEnumerable<Order> GetOrders()
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            SELECT 
-                OrderId AS Id,
-                CustomerId,
-                OrderDate,
-                Status,
-                TotalAmount
-            FROM Orders;";
-
-        return db.Query<Order>(sql);
+        return _context.Orders.Include(o => o.Items).ToList();
     }
 
     public Order? GetById(int id)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            SELECT
-                OrderId AS Id,
-                CustomerId,
-                OrderDate,
-                Status,
-                TotalAmount
-            FROM Orders
-            WHERE OrderId = @Id;";
-
-        return db.QueryFirstOrDefault<Order>(sql, new { Id = id });
+        return _context.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == id);
     }
 
     public IEnumerable<OrderItem> GetItemsForOrder(int orderId)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            SELECT
-                OrderItemId AS Id,
-                OrderId,
-                ProductName,
-                Quantity,
-                UnitPrice
-            FROM OrderItems
-            WHERE OrderId = @OrderId;";
-
-        return db.Query<OrderItem>(sql, new { OrderId = orderId });
+        return _context.OrderItems.Where(i => i.OrderId == orderId).ToList();
     }
 
     public void Add(Order order)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            INSERT INTO Orders (CustomerId, OrderDate, Status, TotalAmount)
-            VALUES (@CustomerId, @OrderDate, @Status, @TotalAmount);";
-
-        db.Execute(sql, new
-        {
-            CustomerId = order.CustomerId,
-            OrderDate = order.OrderDate.ToString("yyyy-MM-dd"),
-            Status = order.Status.ToString(),
-            TotalAmount = order.TotalAmount
-        });
-
-        int orderId = db.ExecuteScalar<int>("SELECT last_insert_rowid();");
-
-        const string sqlItems = @"
-            INSERT INTO OrderItems (OrderId, ProductName, Quantity, UnitPrice)
-            VALUES (@OrderId, @ProductName, @Quantity, @UnitPrice);";
-
-        foreach (var item in order.Items)
-        {
-            db.Execute(sqlItems, new
-            {
-                OrderId = orderId,
-                ProductName = item.ProductName,
-                Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice
-            });
-        }
+        _context.Orders.Add(order);
+        _context.SaveChanges();
     }
 
     public void Update(Order order)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            UPDATE Orders
-            SET CustomerId = @CustomerId,
-                OrderDate = @OrderDate,
-                Status = @Status,
-                TotalAmount = @TotalAmount
-            WHERE OrderId = @Id;";
-
-        db.Execute(sql, new
-        {
-            CustomerId = order.CustomerId,
-            OrderDate = order.OrderDate.ToString("yyyy-MM-dd"),
-            Status = order.Status.ToString(),
-            TotalAmount = order.TotalAmount,
-            Id = order.Id
-        });
+        _context.Orders.Update(order);
+        _context.SaveChanges();
     }
 
     public void Delete(int id)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string deleteItemsSql = @"DELETE FROM OrderItems WHERE OrderId = @Id;";
-        db.Execute(deleteItemsSql, new { Id = id });
-
-        const string deleteOrderSql = @"DELETE FROM Orders WHERE OrderId = @Id;";
-        db.Execute(deleteOrderSql, new { Id = id });
+        var order = _context.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == id);
+        if (order != null)
+        {
+            _context.Orders.Remove(order);
+            _context.SaveChanges();
+        }
     }
 
     public void MarkAsReturned(int orderId)
     {
-        using IDbConnection db = _factory.Create();
-
-        const string sql = @"
-            UPDATE Orders
-            SET Status = @Status
-            WHERE OrderId = @OrderId;";
-
-        db.Execute(sql, new
+        var order = _context.Orders.Find(orderId);
+        if (order != null)
         {
-            Status = OrderStatus.Returned.ToString(),
-            OrderId = orderId
-        });
+            order.SetStatus(OrderStatus.Returned);
+            _context.SaveChanges();
+        }
     }
 }
