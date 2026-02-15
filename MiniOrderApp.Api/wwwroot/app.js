@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://localhost:5242/api';
+// Automatically detect the correct API URL based on current page protocol and host
+const API_BASE_URL = `${window.location.protocol}//${window.location.host}/api`;
 
 // Navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -41,12 +42,18 @@ function showNotification(message, type = 'success') {
 
 async function loadCustomers() {
     try {
+        console.log('Fetching customers from:', `${API_BASE_URL}/customers`);
         const response = await fetch(`${API_BASE_URL}/customers`);
-        if (!response.ok) throw new Error('Failed to load customers');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to load customers: ${response.status} - ${errorText}`);
+        }
         
         const customers = await response.json();
+        console.log('Customers loaded:', customers);
         displayCustomers(customers);
     } catch (error) {
+        console.error('Error loading customers:', error);
         showNotification('Error loading customers: ' + error.message, 'error');
     }
 }

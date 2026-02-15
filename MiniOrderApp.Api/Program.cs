@@ -45,7 +45,12 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.UseHttpsRedirection();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseAuthorization();
 app.MapControllers();
 
