@@ -42,6 +42,12 @@ using (var scope = app.Services.CreateScope())
     DbSeeder.SeedData(dbContext);
 }
 
+app.UseExceptionHandler("/error");
+
+app.Map("/error", (HttpContext context) =>
+{
+    return Results.Problem("Something went wrong.");
+});
 
 if (app.Environment.IsDevelopment())
 {
