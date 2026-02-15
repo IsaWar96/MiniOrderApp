@@ -66,6 +66,15 @@ public class Order
         Status = status;
     }
 
+    public void MarkAsReturned()
+    {
+        if (Status == OrderStatus.Returned)
+        {
+            throw new InvalidOperationException("Order is already marked as returned.");
+        }
+        Status = OrderStatus.Returned;
+    }
+
     public void UpdateDetails(int customerId, DateTime orderDate, OrderStatus status)
     {
         CustomerId = customerId;

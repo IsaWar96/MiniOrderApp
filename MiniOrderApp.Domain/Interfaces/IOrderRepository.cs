@@ -9,7 +9,5 @@ public interface IOrderRepository
     Task DeleteAsync(int id);
 
     Task<IEnumerable<OrderItem>> GetItemsForOrderAsync(int orderId);
-
-    Task MarkAsReturnedAsync(int orderId);
 }
 
