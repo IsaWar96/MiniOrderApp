@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Order App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mini Order App</h1>
+            <nav>
+                <button class="nav-btn active" data-view="customers">Customers</button>
+                <button class="nav-btn" data-view="orders">Orders</button>
+                <button class="nav-btn" data-view="returns">Returns</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Customers View -->
+            <div id="customers-view" class="view active">
+                <div class="view-header">
+                    <h2>Customers</h2>
+                    <button class="btn btn-primary" onclick="showCustomerForm()">Add Customer</button>
+                </div>
+
+                <div id="customer-form" class="form-container" style="display: none;">
+                    <h3 id="customer-form-title">Add Customer</h3>
+                    <form id="customerForm" onsubmit="saveCustomer(event)">
+                        <input type="hidden" id="customerId">
+                        <div class="form-group">
+                            <label for="customerName">Name *</label>
+                            <input type="text" id="customerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerEmail">Email</label>
+                            <input type="email" id="customerEmail">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Phone *</label>
+                            <input type="tel" id="customerPhone" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelCustomerForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="customers-list" class="list-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <!-- Customer rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders View -->
+            <div id="orders-view" class="view">
+                <div class="view-header">
+                    <h2>Orders</h2>
+                    <button class="btn btn-primary" onclick="showOrderForm()">Create Order</button>
+                </div>
+
+                <div id="order-form" class="form-container" style="display: none;">
+                    <h3>Create Order</h3>
+                    <form id="orderForm" onsubmit="saveOrder(event)">
+                        <div class="form-group">
+                            <label for="orderCustomerId">Customer *</label>
+                            <select id="orderCustomerId" required>
+                                <option value="">Select Customer</option>
+                            </select>
+                        </div>
+                        
+                        <h4>Order Items</h4>
+                        <div id="order-items-container">
+                            <!-- Order items will be added here -->
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="addOrderItem()">Add Item</button>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Create Order</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelOrderForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="orders-list" class="list-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer ID</th>
+                                <th>Order Date</th>
+                                <th>Status</th>
+                                <th>Total Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Order rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Returns View -->
+            <div id="returns-view" class="view">
+                <div class="view-header">
+                    <h2>Returns</h2>
+                    <button class="btn btn-primary" onclick="showReturnForm()">Create Return</button>
+                </div>
+
+                <div id="return-form" class="form-container" style="display: none;">
+                    <h3>Create Return</h3>
+                    <form id="returnForm" onsubmit="saveReturn(event)">
+                        <div class="form-group">
+                            <label for="returnOrderId">Order ID *</label>
+                            <input type="number" id="returnOrderId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="returnReason">Reason</label>
+                            <textarea id="returnReason" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="returnAmount">Refunded Amount *</label>
+                            <input type="number" id="returnAmount" step="0.01" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Create Return</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelReturnForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="returns-list" class="list-container">
+                    <div id="returnsContainer">
+                        <!-- Returns will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
