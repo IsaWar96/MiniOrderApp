@@ -5,17 +5,17 @@ namespace MiniOrderApp.Domain;
 public class OrderItem
 {
     public int Id { get; set; }
-    
+
     [Required]
     public int OrderId { get; set; }
-    
+
     [Required]
     [MaxLength(200)]
     public string ProductName { get; set; } = "";
-    
+
     [Required]
     public int Quantity { get; set; }
-    
+
     [Required]
     public decimal UnitPrice { get; set; }
 

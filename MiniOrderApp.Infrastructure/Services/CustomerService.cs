@@ -25,7 +25,7 @@ public class CustomerService : ICustomerService
         }
 
         var customer = _customerRepository.GetById(id);
-        
+
         if (customer == null)
         {
             throw new KeyNotFoundException($"Customer with ID {id} not found.");
@@ -73,7 +73,7 @@ public class CustomerService : ICustomerService
         }
 
         var existingCustomer = _customerRepository.GetById(id);
-        
+
         if (existingCustomer == null)
         {
             throw new KeyNotFoundException($"Customer with ID {id} not found.");
@@ -107,7 +107,7 @@ public class CustomerService : ICustomerService
         }
 
         var customer = _customerRepository.GetById(id);
-        
+
         if (customer == null)
         {
             throw new KeyNotFoundException($"Customer with ID {id} not found.");

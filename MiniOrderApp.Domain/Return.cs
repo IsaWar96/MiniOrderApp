@@ -5,18 +5,18 @@ namespace MiniOrderApp.Domain;
 public class Return
 {
     public int Id { get; set; }
-    
+
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "Order ID must be greater than 0")]
     public int OrderId { get; set; }
-    
+
     [Required]
     public DateTime ReturnDate { get; set; }
-    
+
     [MinLength(2, ErrorMessage = "Reason must be at least 2 characters")]
     [MaxLength(500)]
     public string Reason { get; set; } = "";
-    
+
     [Required]
     public decimal RefundedAmount { get; set; }
 

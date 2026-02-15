@@ -36,7 +36,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.OrderDate).IsRequired();
             entity.Property(e => e.Status).IsRequired();
             entity.Property(e => e.TotalAmount).IsRequired().HasColumnType("decimal(18,2)");
-            
+
             // Configure relationship
             entity.HasMany(e => e.Items)
                 .WithOne()

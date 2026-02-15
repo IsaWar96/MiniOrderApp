@@ -32,7 +32,7 @@ public class ReturnService : IReturnService
         }
 
         var order = _orderRepository.GetById(returnInfo.OrderId);
-        
+
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {returnInfo.OrderId} not found.");
@@ -44,7 +44,7 @@ public class ReturnService : IReturnService
         }
 
         var existingReturn = _returnRepository.GetByOrderId(returnInfo.OrderId);
-        
+
         if (existingReturn != null)
         {
             throw new InvalidOperationException($"A return already exists for order ID {returnInfo.OrderId}.");
@@ -72,14 +72,14 @@ public class ReturnService : IReturnService
         }
 
         var order = _orderRepository.GetById(orderId);
-        
+
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {orderId} not found.");
         }
 
         var returnInfo = _returnRepository.GetByOrderId(orderId);
-        
+
         if (returnInfo == null)
         {
             throw new KeyNotFoundException($"No return found for order ID {orderId}.");

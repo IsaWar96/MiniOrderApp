@@ -27,7 +27,7 @@ public class OrderService : IOrderService
         }
 
         var order = _orderRepository.GetById(id);
-        
+
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {id} not found.");
@@ -98,7 +98,7 @@ public class OrderService : IOrderService
         }
 
         var existingOrder = _orderRepository.GetById(id);
-        
+
         if (existingOrder == null)
         {
             throw new KeyNotFoundException($"Order with ID {id} not found.");
@@ -153,7 +153,7 @@ public class OrderService : IOrderService
         }
 
         var order = _orderRepository.GetById(id);
-        
+
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {id} not found.");
@@ -170,7 +170,7 @@ public class OrderService : IOrderService
         }
 
         var order = _orderRepository.GetById(orderId);
-        
+
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {orderId} not found.");
@@ -187,7 +187,7 @@ public class OrderService : IOrderService
         }
 
         var order = _orderRepository.GetById(orderId);
-        
+
         if (order == null)
         {
             throw new KeyNotFoundException($"Order with ID {orderId} not found.");
