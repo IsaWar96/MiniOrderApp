@@ -19,11 +19,17 @@ builder.Services.AddScoped<IReturnRepository, ReturnRepository>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    /// Allow requests from frontend running on localhost (adjust ports as needed)
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins(
+                "http://localhost:5242",
+                "https://localhost:5242",
+                "http://localhost:5000",
+                "https://localhost:7145"
+            )
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .AllowAnyHeader();
     });
 });
 
@@ -39,12 +45,11 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    /// Enable Swagger in development for API documentation and testing
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
