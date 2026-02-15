@@ -18,53 +18,43 @@ public class ReturnsController : ControllerBase
         _orderRepository = orderRepository;
     }
 
+    // GET: api/returns
+    [HttpGet]
+    public ActionResult<IEnumerable<Return>> GetAll()
+    {
+        var returns = _returnRepository.GetAll();
+        return Ok(returns);
+    }
+
     // GET: api/returns/order/5
     [HttpGet("order/{orderId}")]
     public ActionResult<Return> GetByOrderId(int orderId)
     {
-        try
+        var returnInfo = _returnRepository.GetByOrderId(orderId);
+        if (returnInfo == null)
         {
-            var returnInfo = _returnRepository.GetByOrderId(orderId);
-            if (returnInfo == null)
-            {
-                return NotFound($"No return found for order ID {orderId}.");
-            }
-            return Ok(returnInfo);
+            return NotFound($"No return found for order ID {orderId}.");
         }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+        return Ok(returnInfo);
     }
 
     // POST: api/returns
     [HttpPost]
     public ActionResult<Return> Create([FromBody] ReturnCreateDto dto)
     {
-        try
+        var order = _orderRepository.GetById(dto.OrderId);
+        if (order == null)
         {
-            var order = _orderRepository.GetById(dto.OrderId);
-            if (order == null)
-            {
-                return BadRequest($"Order with ID {dto.OrderId} not found.");
-            }
-
-            var returnInfo = new Return(dto.OrderId, DateTime.Now, dto.Reason, dto.RefundedAmount);
-            _returnRepository.AddReturn(returnInfo);
-
-            // Mark the order as returned
-            _orderRepository.MarkAsReturned(dto.OrderId);
-
-            return CreatedAtAction(nameof(GetByOrderId), new { orderId = returnInfo.OrderId }, returnInfo);
+            return BadRequest($"Order with ID {dto.OrderId} not found.");
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
+
+        var returnInfo = new Return(dto.OrderId, DateTime.Now, dto.Reason, dto.RefundedAmount);
+        _returnRepository.AddReturn(returnInfo);
+
+        // Mark the order as returned
+        _orderRepository.MarkAsReturned(dto.OrderId);
+
+        return CreatedAtAction(nameof(GetByOrderId), new { orderId = returnInfo.OrderId }, returnInfo);
     }
 }
 
