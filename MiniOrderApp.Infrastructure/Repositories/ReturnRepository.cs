@@ -19,10 +19,10 @@ public class ReturnRepository : IReturnRepository
         return await _context.Returns.ToListAsync();
     }
 
-    public async Task AddReturnAsync(Return returnInfo)
+    public Task AddReturnAsync(Return returnInfo)
     {
         _context.Returns.Add(returnInfo);
-        await _context.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
     public async Task<Return?> GetByOrderIdAsync(int orderId)

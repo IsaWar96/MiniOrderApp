@@ -29,16 +29,16 @@ public class OrderRepository : IOrderRepository
         return await _context.OrderItems.Where(i => i.OrderId == orderId).ToListAsync();
     }
 
-    public async Task AddAsync(Order order)
+    public Task AddAsync(Order order)
     {
         _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
-    public async Task UpdateAsync(Order order)
+    public Task UpdateAsync(Order order)
     {
         _context.Orders.Update(order);
-        await _context.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
     public async Task DeleteAsync(int id)
@@ -47,17 +47,6 @@ public class OrderRepository : IOrderRepository
         if (order != null)
         {
             _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    public async Task MarkAsReturnedAsync(int orderId)
-    {
-        var order = await _context.Orders.FindAsync(orderId);
-        if (order != null)
-        {
-            order.SetStatus(OrderStatus.Returned);
-            await _context.SaveChangesAsync();
         }
     }
 }
