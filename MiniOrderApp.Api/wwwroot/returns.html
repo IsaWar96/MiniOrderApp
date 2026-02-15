@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Order App - Returns</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mini Order App</h1>
+            <nav>
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="customers.html" class="nav-link">Customers</a>
+                <a href="orders.html" class="nav-link">Orders</a>
+                <a href="returns.html" class="nav-link active">Returns</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="view-header">
+                <h2>Returns</h2>
+                <button class="btn btn-primary" onclick="showReturnForm()">Create Return</button>
+            </div>
+
+            <div id="return-form" class="form-container" style="display: none;">
+                <h3>Create Return</h3>
+                <form id="returnForm" onsubmit="saveReturn(event)">
+                    <div class="form-group">
+                        <label for="returnOrderId">Order ID *</label>
+                        <input type="number" id="returnOrderId" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="returnReason">Reason *</label>
+                        <textarea id="returnReason" rows="3" minlength="2" maxlength="500" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="returnAmount">Refunded Amount *</label>
+                        <input type="number" id="returnAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Create Return</button>
+                        <button type="button" class="btn btn-secondary" onclick="cancelReturnForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="returns-list" class="list-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Order ID</th>
+                            <th>Return Date</th>
+                            <th>Reason</th>
+                            <th>Refunded Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="returnsTableBody">
+                        <!-- Return rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="returns.js"></script>
+</body>
+</html>

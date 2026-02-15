@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Order App - Customers</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mini Order App</h1>
+            <nav>
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="customers.html" class="nav-link active">Customers</a>
+                <a href="orders.html" class="nav-link">Orders</a>
+                <a href="returns.html" class="nav-link">Returns</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="view-header">
+                <h2>Customers</h2>
+                <button class="btn btn-primary" onclick="showCustomerForm()">Add Customer</button>
+            </div>
+
+            <div id="customer-form" class="form-container" style="display: none;">
+                <h3 id="customer-form-title">Add Customer</h3>
+                <form id="customerForm" onsubmit="saveCustomer(event)">
+                    <input type="hidden" id="customerId">
+                    <div class="form-group">
+                        <label for="customerName">Name *</label>
+                        <input type="text" id="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmail">Email</label>
+                        <input type="email" id="customerEmail">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone *</label>
+                        <input type="tel" id="customerPhone" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" onclick="cancelCustomerForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="customers-list" class="list-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <!-- Customer rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="customers.js"></script>
+</body>
+</html>

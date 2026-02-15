@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Order App - Orders</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mini Order App</h1>
+            <nav>
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="customers.html" class="nav-link">Customers</a>
+                <a href="orders.html" class="nav-link active">Orders</a>
+                <a href="returns.html" class="nav-link">Returns</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="view-header">
+                <h2>Orders</h2>
+                <button class="btn btn-primary" onclick="showOrderForm()">Create Order</button>
+            </div>
+
+            <div id="order-form" class="form-container" style="display: none;">
+                <h3>Create Order</h3>
+                <form id="orderForm" onsubmit="saveOrder(event)">
+                    <div class="form-group">
+                        <label for="orderCustomerId">Customer *</label>
+                        <select id="orderCustomerId" required>
+                            <option value="">Select Customer</option>
+                        </select>
+                    </div>
+                    
+                    <h4>Order Items</h4>
+                    <div id="order-items-container">
+                        <!-- Order items will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addOrderItem()">Add Item</button>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Create Order</button>
+                        <button type="button" class="btn btn-secondary" onclick="cancelOrderForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="orders-list" class="list-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer ID</th>
+                            <th>Order Date</th>
+                            <th>Status</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Order rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="orders.js"></script>
+</body>
+</html>
