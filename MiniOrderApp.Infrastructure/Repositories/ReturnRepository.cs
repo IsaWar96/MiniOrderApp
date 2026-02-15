@@ -13,6 +13,11 @@ public class ReturnRepository : IReturnRepository
         _context = context;
     }
 
+    public IEnumerable<Return> GetAll()
+    {
+        return _context.Returns.ToList();
+    }
+
     public void AddReturn(Return returnInfo)
     {
         _context.Returns.Add(returnInfo);
