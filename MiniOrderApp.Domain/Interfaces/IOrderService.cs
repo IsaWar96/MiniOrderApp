@@ -4,11 +4,11 @@ namespace MiniOrderApp.Domain.Interfaces;
 
 public interface IOrderService
 {
-    IEnumerable<Order> GetAllOrders();
-    Order GetOrderById(int id);
-    Order CreateOrder(Order order);
-    Order UpdateOrder(int id, Order order);
-    void DeleteOrder(int id);
-    IEnumerable<OrderItem> GetOrderItems(int orderId);
-    void MarkOrderAsReturned(int orderId);
+    Task<IEnumerable<Order>> GetAllOrdersAsync();
+    Task<Order> GetOrderByIdAsync(int id);
+    Task<Order> CreateOrderAsync(int customerId, List<OrderItem> items);
+    Task<Order> UpdateOrderAsync(int id, int customerId, DateTime orderDate, OrderStatus status);
+    Task DeleteOrderAsync(int id);
+    Task<IEnumerable<OrderItem>> GetOrderItemsAsync(int orderId);
+    Task MarkOrderAsReturnedAsync(int orderId);
 }

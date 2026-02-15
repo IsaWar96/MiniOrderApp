@@ -4,7 +4,7 @@ namespace MiniOrderApp.Domain.Interfaces;
 
 public interface IReturnService
 {
-    IEnumerable<Return> GetAllReturns();
-    Return CreateReturn(Return returnInfo);
-    Return GetReturnByOrderId(int orderId);
+    Task<IEnumerable<Return>> GetAllReturnsAsync();
+    Task<Return> CreateReturnAsync(int orderId, string reason);
+    Task<Return> GetReturnByOrderIdAsync(int orderId);
 }
