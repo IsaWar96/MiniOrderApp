@@ -112,6 +112,3 @@ The database is automatically created on first run with **sample seed data** inc
 - **Static files**: Frontend served from `wwwroot/` directory
 - **API documentation**: Available via Swagger UI
 
-## License
-
-Educational project for learning purposes.
