@@ -95,6 +95,45 @@ The application uses SQLite with a connection string configured in `appsettings.
 
 The database is automatically created on first run using EF Core migrations.
 
+## What I Learned
+
+Building this project taught me several important software development concepts:
+
+### Architecture & Design Patterns
+- **Separation of Concerns**: Organizing code into distinct layers (Domain, Infrastructure, API) where each has a specific responsibility
+- **Repository Pattern**: Abstracting database access through repositories, providing a clean interface between the application and data layer
+- **Service Layer Pattern**: Using services to orchestrate business logic and coordinate between repositories
+- **Clean Architecture**: Keeping the domain layer independent and at the center, with dependencies pointing inward
+
+### Domain-Driven Design
+- **Domain Entities**: Creating rich domain models that protect their own invariants and encapsulate business rules
+- **Validation in Constructors**: Ensuring entities are always in a valid state by validating data when objects are created
+- **Private Setters**: Protecting entity state from unauthorized modifications outside the class
+- **Encapsulation**: Using private methods and backing fields to control how entity data is modified
+
+### API Development
+- **RESTful Endpoints**: Designing intuitive API routes following REST conventions (GET, POST, PUT, DELETE)
+- **Controllers**: Understanding how controllers handle HTTP requests and coordinate between the client and services
+- **DTOs (Data Transfer Objects)**: Separating API response models from domain entities to control what data is exposed
+- **HTTP Status Codes**: Returning appropriate status codes (200 OK, 201 Created, 404 Not Found, etc.)
+
+### Asynchronous Programming
+- **Async/Await Pattern**: Using `async` and `await` keywords for non-blocking I/O operations
+- **Task<T>**: Understanding how `Task` represents asynchronous operations that return values
+- **Benefits**: Learning that async operations improve scalability by freeing up threads during database/IO operations
+
+### Entity Framework Core
+- **Code-First Approach**: Defining database schema through C# classes and migrations
+- **DbContext**: Understanding the role of DbContext as the bridge between domain entities and the database
+- **Migrations**: Using EF Core migrations to version and evolve the database schema
+- **Relationships**: Configuring entity relationships (one-to-many between Order and OrderItem)
+
+### Additional Concepts
+- **Dependency Injection**: Registering and injecting services, repositories, and DbContext through the built-in DI container
+- **CORS Configuration**: Enabling cross-origin requests to allow frontend applications to consume the API
+- **Swagger/OpenAPI**: Automatic API documentation generation for testing and exploration
+- **SQLite**: Working with a lightweight, file-based relational database perfect for development and small applications
+
 ## Development
 
 - **Hot reload**: Supported for both API and frontend
