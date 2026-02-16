@@ -1,7 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Api.Dtos.Customers;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -18,33 +17,70 @@ public class CustomersController : ControllerBase
 
     // GET: api/customers
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Customer>>> GetAll()
+    public async Task<ActionResult<IEnumerable<CustomerResponseDto>>> GetAll()
     {
         var customers = await _customerService.GetAllCustomersAsync();
-        return Ok(customers);
+
+        var result = customers.Select(c =>
+            new CustomerResponseDto(
+                c.Id,
+                c.Name,
+                c.Email
+            )
+        );
+
+        return Ok(result);
     }
 
     // GET: api/customers/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Customer>> GetById(int id)
+    public async Task<ActionResult<CustomerResponseDto>> GetById(int id)
     {
         var customer = await _customerService.GetCustomerByIdAsync(id);
-        return Ok(customer);
+        if (customer == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(new CustomerResponseDto(
+            customer.Id,
+            customer.Name,
+            customer.Email
+            )
+        );
     }
 
     // POST: api/customers
     [HttpPost]
-    public async Task<ActionResult<Customer>> Create(CustomerCreateDto dto)
+    public async Task<ActionResult<CustomerResponseDto>> Create(CustomerCreateDto dto)
     {
         var createdCustomer = await _customerService.CreateCustomerAsync(dto.Name, dto.Email, dto.Phone);
-        return CreatedAtAction(nameof(GetById), new { id = createdCustomer.Id }, createdCustomer);
+        return CreatedAtAction(nameof(GetById),
+            new { id = createdCustomer.Id },
+            new CustomerResponseDto(
+            createdCustomer.Id,
+            createdCustomer.Name,
+            createdCustomer.Email
+            )
+        );
     }
 
     // PUT: api/customers/5
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, CustomerUpdateDto dto)
     {
-        await _customerService.UpdateCustomerAsync(id, dto.Name, dto.Email, dto.Phone);
+        await _customerService.UpdateCustomerAsync(
+            id,
+            dto.Name,
+            dto.Email,
+            dto.Phone
+        );
+
+        if (await _customerService.GetCustomerByIdAsync(id) == null)
+        {
+            return NotFound();
+        }
+
         return NoContent();
     }
 
@@ -52,20 +88,12 @@ public class CustomersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
+        if (await _customerService.GetCustomerByIdAsync(id) == null)
+        {
+            return NotFound();
+        }
+
         await _customerService.DeleteCustomerAsync(id);
         return NoContent();
     }
 }
-
-// DTOs
-public record CustomerCreateDto(
-    [Required][MaxLength(200)] string Name,
-    [EmailAddress(ErrorMessage = "Invalid email format")][MaxLength(200)] string Email,
-    [Required][MaxLength(50)] string Phone
-);
-
-public record CustomerUpdateDto(
-    [Required][MaxLength(200)] string Name,
-    [EmailAddress(ErrorMessage = "Invalid email format")][MaxLength(200)] string Email,
-    [Required][MaxLength(50)] string Phone
-);
