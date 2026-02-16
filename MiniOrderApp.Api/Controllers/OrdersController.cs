@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MiniOrderApp.Domain;
 using MiniOrderApp.Domain.Interfaces;
+using MiniOrderApp.Api.Dtos.Orders;
 
 namespace MiniOrderApp.Api.Controllers;
 
@@ -17,41 +18,80 @@ public class OrdersController : ControllerBase
 
     // GET: api/orders
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Order>>> GetAll()
+    public async Task<ActionResult<IEnumerable<OrderResponseDto>>> GetAll()
     {
         var orders = await _orderService.GetAllOrdersAsync();
-        return Ok(orders);
+
+        var result = orders.Select(o =>
+            new OrderResponseDto(
+                o.Id,
+                o.CustomerId,
+                o.OrderDate,
+                o.Status,
+                o.TotalAmount
+            )
+        );
+
+        return Ok(result);
     }
 
     // GET: api/orders/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Order>> GetById(int id)
+    public async Task<ActionResult<OrderResponseDto>> GetById(int id)
     {
         var order = await _orderService.GetOrderByIdAsync(id);
-        return Ok(order);
+
+        if (order == null)
+            return NotFound();
+
+        return Ok(new OrderResponseDto(
+            order.Id,
+            order.CustomerId,
+            order.OrderDate,
+            order.Status,
+            order.TotalAmount
+        ));
     }
 
     // GET: api/orders/5/items
     [HttpGet("{id}/items")]
-    public async Task<ActionResult<IEnumerable<OrderItem>>> GetOrderItems(int id)
+    public async Task<ActionResult<IEnumerable<OrderItemDto>>> GetOrderItems(int id)
     {
         var items = await _orderService.GetOrderItemsAsync(id);
-        return Ok(items);
+
+        if (items == null)
+            return NotFound();
+
+        var result = items.Select(i =>
+            new OrderItemDto(
+                i.ProductName,
+                i.Quantity,
+                i.UnitPrice
+            )
+        );
+
+        return Ok(result);
     }
 
     // POST: api/orders
     [HttpPost]
-    public async Task<ActionResult<Order>> Create(OrderCreateDto dto)
+    public async Task<ActionResult<OrderResponseDto>> Create(OrderCreateDto dto)
     {
-        var items = new List<OrderItem>();
-        foreach (var itemDto in dto.Items)
-        {
-            var item = new OrderItem(itemDto.ProductName, itemDto.Quantity, itemDto.UnitPrice);
-            items.Add(item);
-        }
+        var items = dto.Items.Select(i =>
+            new OrderItem(i.ProductName, i.Quantity, i.UnitPrice)
+        ).ToList();
 
         var createdOrder = await _orderService.CreateOrderAsync(dto.CustomerId, items);
-        return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, createdOrder);
+
+        var response = new OrderResponseDto(
+            createdOrder.Id,
+            createdOrder.CustomerId,
+            createdOrder.OrderDate,
+            createdOrder.Status,
+            createdOrder.TotalAmount
+        );
+
+        return CreatedAtAction(nameof(GetById), new { id = createdOrder.Id }, response);
     }
 
     // PUT: api/orders/5/status
@@ -59,7 +99,12 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult> UpdateStatus(int id, OrderStatusUpdateDto dto)
     {
         var order = await _orderService.GetOrderByIdAsync(id);
+
+        if (order == null)
+            return NotFound();
+
         await _orderService.UpdateOrderAsync(id, order.CustomerId, order.OrderDate, dto.Status);
+
         return NoContent();
     }
 
@@ -67,12 +112,13 @@ public class OrdersController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
+        var order = await _orderService.GetOrderByIdAsync(id);
+
+        if (order == null)
+            return NotFound();
+
         await _orderService.DeleteOrderAsync(id);
+
         return NoContent();
     }
 }
-
-// DTOs
-public record OrderCreateDto(int CustomerId, List<OrderItemDto> Items);
-public record OrderItemDto(string ProductName, int Quantity, decimal UnitPrice);
-public record OrderStatusUpdateDto(OrderStatus Status);
