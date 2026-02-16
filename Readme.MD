@@ -2,7 +2,7 @@
 
 MiniOrderApp is a full-stack order management system built with ASP.NET Core Web API, Entity Framework Core, SQLite, and modern web technologies (HTML, CSS, JavaScript).
 
-The application follows a clean architecture pattern with separate projects for Domain, Infrastructure, API, Presentation (console UI), and Tests.
+The application follows a clean architecture pattern with separate projects for Domain, Infrastructure, and API.
 
 ## Features
 
@@ -13,7 +13,6 @@ The application follows a clean architecture pattern with separate projects for 
 - **Order management** with multiple items per order
 - **Return processing** with reason tracking and refund amounts
 - **CORS enabled** for API access
-- **Integration tests** for repositories
 
 ## Architecture
 
@@ -22,8 +21,6 @@ The application follows a clean architecture pattern with separate projects for 
 - **MiniOrderApp.Domain**: Core business entities and interfaces
 - **MiniOrderApp.Infrastructure**: EF Core DbContext and repository implementations
 - **MiniOrderApp.Api**: ASP.NET Core Web API with controllers and frontend
-- **MiniOrderApp.Presentation**: Console-based UI (**LEGACY - Not maintained, incompatible with current EF Core setup**)
-- **MiniOrderApp.Tests**: Integration tests
 
 ### Technology Stack
 
@@ -63,11 +60,6 @@ The application follows a clean architecture pattern with separate projects for 
 5. **Access the application**
    - **Web Frontend**: https://localhost:5242/
    - **Swagger UI**: https://localhost:5242/swagger
-
-6. **Run tests (optional)**
-   ```bash
-   dotnet test
-   ```
 
 ## API Endpoints
 
