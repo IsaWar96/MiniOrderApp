@@ -6,18 +6,8 @@ public class Order
 {
     public int Id { get; private set; }
 
-    private int _customerId;
     [Required]
-    public int CustomerId
-    {
-        get => _customerId;
-        private set
-        {
-            if (value <= 0)
-                throw new ArgumentException("CustomerId must be positive", nameof(CustomerId));
-            _customerId = value;
-        }
-    }
+    public int CustomerId { get; private set; }
 
     [Required]
     public DateTime OrderDate { get; private set; }
@@ -25,31 +15,26 @@ public class Order
     [Required]
     public OrderStatus Status { get; private set; }
 
-    private decimal _totalAmount;
     [Required]
-    public decimal TotalAmount
-    {
-        get => _totalAmount;
-        private set
-        {
-            if (value < 0)
-                throw new ArgumentException("TotalAmount cannot be negative", nameof(TotalAmount));
-            _totalAmount = value;
-        }
-    }
+    public decimal TotalAmount { get; private set; }
 
     // Holds items in the order
     public List<OrderItem> Items { get; } = new();
 
     public Order(int customerId, DateTime orderDate, decimal totalAmount)
     {
+        if (customerId <= 0)
+            throw new ArgumentException("CustomerId must be positive", nameof(customerId));
+        if (totalAmount < 0)
+            throw new ArgumentException("TotalAmount cannot be negative", nameof(totalAmount));
+
         CustomerId = customerId;
         OrderDate = orderDate;
         Status = OrderStatus.Created;
         TotalAmount = totalAmount;
     }
 
-    public Order()
+    private Order()
     {
     }
 
@@ -59,11 +44,6 @@ public class Order
 
         Items.Add(item);
         RecalculateTotal();
-    }
-
-    public void SetStatus(OrderStatus status)
-    {
-        Status = status;
     }
 
     public void MarkAsReturned()
@@ -82,7 +62,7 @@ public class Order
         Status = status;
     }
 
-    public void RecalculateTotal()
+    private void RecalculateTotal()
     {
         TotalAmount = 0;
         foreach (var i in Items)
