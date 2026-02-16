@@ -79,6 +79,7 @@ The application follows a clean architecture pattern with separate projects for 
 - `DELETE /api/orders/{id}` - Delete order
 
 ### Returns
+- `GET /api/returns` - Get all returns
 - `GET /api/returns/order/{orderId}` - Get return by order ID
 - `POST /api/returns` - Create new return
 
@@ -92,15 +93,12 @@ The application uses SQLite with a connection string configured in `appsettings.
 }
 ```
 
-The database is automatically created on first run with **sample seed data** including:
-- 5 sample customers
-- 3 sample orders with order items
-- Ready to test immediately without manual data entry
+The database is automatically created on first run using EF Core migrations.
 
 ## Development
 
 - **Hot reload**: Supported for both API and frontend
-- **CORS**: Enabled for all origins in development
+- **CORS**: Configured for localhost origins during development
 - **Static files**: Frontend served from `wwwroot/` directory
 - **API documentation**: Available via Swagger UI
 
