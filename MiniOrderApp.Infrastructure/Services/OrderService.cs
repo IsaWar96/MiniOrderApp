@@ -19,7 +19,13 @@ public class OrderService : IOrderService
 
     public async Task<IEnumerable<Order>> GetAllOrdersAsync()
     {
-        return await _orderRepository.GetOrdersAsync();
+        var orders = await _orderRepository.GetOrdersAsync();
+        if (orders == null)
+        {
+            throw new ArgumentException("Orders cannot be null", nameof(orders));
+        }
+
+        return orders;
     }
 
     public async Task<Order> GetOrderByIdAsync(int id)

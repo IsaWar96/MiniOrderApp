@@ -17,7 +17,12 @@ public class CustomerService : ICustomerService
 
     public async Task<IEnumerable<Customer>> GetAllCustomersAsync()
     {
-        return await _customerRepository.GetCustomersAsync();
+        var customers = await _customerRepository.GetCustomersAsync();
+        if (customers == null)
+        {
+            throw new ArgumentException("Customers cannot be null", nameof(customers));
+        }
+        return customers;
     }
 
     public async Task<Customer> GetCustomerByIdAsync(int id)
@@ -40,6 +45,11 @@ public class CustomerService : ICustomerService
     public async Task<Customer> CreateCustomerAsync(string name, string email, string phone)
     {
         var customer = new Customer(name, email, phone);
+        if (customer == null)
+        {
+            throw new ArgumentException("Customer cannot be null", nameof(customer));
+        }
+
         await _customerRepository.AddAsync(customer);
         await _context.SaveChangesAsync();
         return customer;

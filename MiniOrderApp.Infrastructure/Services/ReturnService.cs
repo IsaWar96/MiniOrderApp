@@ -19,7 +19,13 @@ public class ReturnService : IReturnService
 
     public async Task<IEnumerable<Return>> GetAllReturnsAsync()
     {
-        return await _returnRepository.GetAllAsync();
+        var returns = await _returnRepository.GetAllAsync();
+        if (returns == null)
+        {
+            throw new ArgumentException("Returns cannot be null", nameof(returns));
+        }
+
+        return returns;
     }
 
     public async Task<Return> CreateReturnAsync(int orderId, string reason)
@@ -43,17 +49,13 @@ public class ReturnService : IReturnService
             throw new InvalidOperationException($"A return already exists for order ID {orderId}.");
         }
 
-        // Domain entity will validate reason and other invariants
         var returnInfo = new Return(orderId, DateTime.UtcNow, reason, order.TotalAmount);
 
-        // Mark order as returned using domain method
         order.MarkAsReturned();
 
-        // Add both changes to the context
         await _returnRepository.AddReturnAsync(returnInfo);
         await _orderRepository.UpdateAsync(order);
 
-        // Save changes once - ensures transactional consistency
         await _context.SaveChangesAsync();
 
         return returnInfo;
